@@ -391,15 +391,19 @@ class AuriClassAnalysis:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description=__description__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
-    # Main arguments
-    main_args = parser.add_argument_group("Main arguments")
-    main_args.add_argument(
+    # Required arguments
+    required_args = parser.add_argument_group("REQUIRED")
+    required_args.add_argument(
         "read_file_paths",
         help="Paths to read files",
         nargs="+",
     )
+
+    # Main arguments
+    main_args = parser.add_argument_group("Main arguments")
     main_args.add_argument(
         "-n",
         "--name",
@@ -456,7 +460,7 @@ if __name__ == "__main__":
 
     # Other arguments
     other_args = parser.add_argument_group(
-        "Other arguments\nOnly change these settings if you are doing something special.\nThis will require rebuilding the reference sketch"
+        "Other arguments\nNOTE: Only change these settings if you are doing something special.\nNOTE: This will require rebuilding the reference sketch"
     )
     other_args.add_argument(
         "-r",
