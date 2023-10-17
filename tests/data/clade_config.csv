@@ -1,0 +1,3 @@
+filename,clade
+tests/data/NC_001416.1.fasta,Lambda phage
+tests/data/NC_001604.1.fasta,outgroup

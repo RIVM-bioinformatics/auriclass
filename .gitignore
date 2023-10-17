@@ -4,3 +4,4 @@ report.tsv
 .vscode
 __pycache__
 *.py[cod]
+tmp_data

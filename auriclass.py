@@ -3,7 +3,6 @@
 import argparse
 import logging
 import subprocess
-import sys
 import tempfile
 from io import StringIO
 from pathlib import Path
@@ -50,6 +49,7 @@ class AuriClassAnalysis:
         self.qc_species = None
         self.qc_distance = None
         self.qc_multiple_hits = None
+        self.qc_new_clade = None
         self.query_sketch_path = None
         self.minimal_distance = None
         self.clade = None
@@ -66,8 +66,10 @@ class AuriClassAnalysis:
         """
         # check if mash is installed
         try:
-            subprocess.run(
-                ["mash", "-h"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            subprocess.call(
+                ["mash", "-h"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
         except FileNotFoundError:
             raise FileNotFoundError("mash is not installed")
@@ -250,7 +252,7 @@ class AuriClassAnalysis:
             logging.warning(
                 f"AuriClass found a distance of {self.minimal_distance} to the closest sample, please ensure this is Candida auris"
             )
-            self.qc_distance = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
+            self.qc_new_clade = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
 
     def get_error_bounds(self):
         """
@@ -356,6 +358,7 @@ class AuriClassAnalysis:
                 self.qc_genome_size,
                 self.qc_species,
                 self.qc_multiple_hits,
+                self.qc_new_clade,
             ]
         ):
             self.qc_decision = "WARN"
@@ -373,6 +376,7 @@ class AuriClassAnalysis:
                     self.qc_species,
                     self.qc_distance,
                     self.qc_multiple_hits,
+                    self.qc_new_clade,
                 ]
             ],
             columns=[
@@ -384,6 +388,7 @@ class AuriClassAnalysis:
                 "QC_species",
                 "QC_distance",
                 "QC_multiple_hits",
+                "QC_possible_new_clade",
             ],
         ).fillna("-").to_csv(self.output_report_path, sep="\t", index=False)
 

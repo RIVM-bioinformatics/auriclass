@@ -1,0 +1,25 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Install Conda environment with Micromamba
+      uses: mamba-org/provision-with-micromamba@main
+      with:
+        cache-downloads: true
+        environment-file: env.yaml
+
+    - name: Conda list
+      shell: bash -l {0}
+      run: conda list
+
+    - name: Run tests
+      shell: bash -l {0}
+      run: pytest
