@@ -555,17 +555,3 @@ if __name__ == "__main__":
 
     # Save report
     sample.save_report()
-
-    # print(
-    #     sample.name,
-    #     sample.kmer_size,
-    #     sample.sketch_size,
-    #     sample.minimal_kmer_coverage,
-    #     sample.closest_sample,
-    #     sample.clade,
-    #     sample.minimal_distance,
-    #     "|".join([str(x) for x in sample.distances]),
-    #     sample.error_bound,
-    #     sample.samples_within_error_bound,
-    #     sep="\t",
-    # )
