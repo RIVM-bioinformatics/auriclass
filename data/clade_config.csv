@@ -1,0 +1,10 @@
+filename,clade
+refs/GCA_002759435.2_Cand_auris_B8441_V2_genomic.fna,Clade I
+refs/GCA_003013715.2_ASM301371v2_genomic.fna,Clade II
+refs/GCA_002775015.1_Cand_auris_B11221_V1_genomic.fna,Clade III
+refs/GCA_003014415.1_Cand_auris_B11243_genomic.fna,Clade IV
+refs/GCA_016809505.1_ASM1680950v1_genomic.fna,Clade V
+refs/GCA_032367535.1_ASM3236753v1_genomic.fna,Clade VI
+refs/GCF_003013735.1_Cand_pseudohaemulonii_B12108_genomic.fna,outgroup
+refs/GCF_002926055.2_CanHae_1.0_genomic.fna,outgroup
+refs/GCF_000182965.3_ASM18296v3_genomic.fna,outgroup
