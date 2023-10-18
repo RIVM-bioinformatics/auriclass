@@ -3,7 +3,7 @@ name: Test
 on: [push, pull_request]
 
 jobs:
-  test:
+  unit_tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,3 +23,51 @@ jobs:
     - name: Run tests
       shell: bash -l {0}
       run: pytest
+  cli_test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install Conda environment with Micromamba
+        uses: mamba-org/provision-with-micromamba@main
+        with:
+          cache-downloads: true
+          environment-file: env.yaml
+
+      - name: Conda list
+        shell: bash -l {0}
+        run: conda list
+
+      - name: Run tests
+        shell: bash -l {0}
+        run: |
+          # Check if basic functions can be called without error
+          python auriclass.py --help
+          python auriclass.py --version
+
+          # Run example without error
+          python auriclass.py --expected_genome_size 40000 60000 \
+          --output report.tsv \
+          -r tests/data/ref_sketch.msh \
+          -c tests/data/clade_config.csv \
+          tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+
+          cmp report.tsv tests/data/reference_report.tsv
+
+          # Throw error if no read files are specified
+          ! python auriclass.py 
+
+          # Throw error if argument values are invalid
+          ! python auriclass.py --expected_genome_size -1 1000000 tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+
+          # Throw error if non-existent argument is provided
+          ! python auriclass.py --does_not_exist tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+
+          # Throw error if non-existent files is provided
+          ! python auriclass.py tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz tests/data/does_not_exist.fq.gz
+
+          # Throw error if fasta is provided (until fasta handling is implemented)
+          ! python auriclass.py tests/data/NC_001416.1.fasta.gz
+
+          # Throw error if non-fastq, non-fasta file is provided
+          ! python auriclass.py tests/data/report.tsv

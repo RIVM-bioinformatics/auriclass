@@ -1,0 +1,2 @@
+Sample	Clade	Mash_distance_from_closest_reference	QC_decision	QC_genome_size	QC_species	QC_distance	QC_multiple_hits	QC_possible_new_clade
+isolate	Lambda phage	9.55405e-06	PASS	-	-	-	-	-
