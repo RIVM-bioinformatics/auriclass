@@ -37,7 +37,9 @@ class AuriClassAnalysis:
         self.kmer_size = kmer_size
         self.sketch_size = sketch_size
         self.minimal_kmer_coverage = minimal_kmer_coverage
-        self.probability = 0.99  # used for mash bounds
+        # self.probability is used for mash bounds
+        # this is not exposed in the CLI, because this should typically not be changed without extensive testing.
+        self.probability = 0.99
         self.clade_dict = pd.read_csv(clade_config_path, index_col=0).to_dict(
             orient="dict"
         )
