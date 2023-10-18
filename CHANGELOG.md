@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.1.0...v0.2.0) (2023-10-18)
+
+
+### Features
+
+* add input/arg validation ([9467b43](https://github.com/RIVM-bioinformatics/auriclass/commit/9467b43d444bd16a8fc2bc23232dabe646008037))
+
 ## 0.1.0 (2023-10-17)
 
 
