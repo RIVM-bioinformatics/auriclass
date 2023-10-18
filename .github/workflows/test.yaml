@@ -52,7 +52,7 @@ jobs:
           -c tests/data/clade_config.csv \
           tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
 
-          cmp report.tsv tests/data/report.tsv
+          cmp report.tsv tests/data/reference_report.tsv
 
           # Throw error if no read files are specified
           ! python auriclass.py 
