@@ -37,8 +37,8 @@ def test_main():
         non_candida_threshold=0.1,
         new_clade_threshold=0.005,
     )
+    testsample.validate_input_files()
     testsample.check_dependencies()
-    testsample.check_input_files()
 
     # Sketch query genome using tempfile
     with tempfile.TemporaryDirectory() as tmpdir:

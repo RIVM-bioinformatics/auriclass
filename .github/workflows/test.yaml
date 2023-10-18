@@ -65,3 +65,8 @@ jobs:
           # Throw error if non-existent files is provided
           ! python auriclass.py tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz tests/data/does_not_exist.fq.gz
 
+          # Throw error if fasta is provided (until fasta handling is implemented)
+          ! python auriclass.py tests/data/NC_001416.1.fasta.gz
+
+          # Throw error if non-fastq, non-fasta file is provided
+          ! python auriclass.py tests/data/report.tsv

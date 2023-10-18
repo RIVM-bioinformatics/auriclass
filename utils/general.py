@@ -1,5 +1,7 @@
 import argparse
 
+import pyfastx
+
 
 def add_tag(tag, lines):
     """
@@ -43,3 +45,19 @@ def check_number_within_range(minimum=0, maximum=1):
         return str(value)
 
     return generated_func_check_range
+
+
+def is_fastq(file):
+    try:
+        pyfastx.Fastq(file, build_index=False)
+        return True
+    except RuntimeError:
+        return False
+
+
+def is_fasta(file):
+    try:
+        pyfastx.Fasta(file, build_index=False)
+        return True
+    except RuntimeError:
+        return False

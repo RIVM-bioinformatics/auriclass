@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from utils.general import add_tag
+from utils.general import add_tag, check_number_within_range, is_fasta, is_fastq
 from version import __description__, __package_name__, __version__
 
 
@@ -64,6 +64,40 @@ class AuriClassAnalysis:
         self.mash_output = None
         self.distances = None
 
+    def validate_argument_logic(self):
+        # Check if specified genome size range is valid
+        if self.genome_size_range[0] > self.genome_size_range[1]:
+            raise ValueError(
+                "Expected genome size range is invalid: lower bound is higher than upper bound"
+            )
+        elif (self.genome_size_range[0] < 100) & (self.genome_size_range[1] < 100):
+            logging.warning(
+                f"Expected genome size range boundaries {self.genome_size_range} are below 100: treating these as Mbp instead of bp"
+            )
+            self.genome_size_range = [
+                self.genome_size_range[0] * 1_000_000,
+                self.genome_size_range[1] * 1_000_000,
+            ]
+
+    def validate_input_files(self):
+        for filepath in self.read_paths:
+            if not Path(filepath).exists():
+                raise FileNotFoundError(f"Read file {filepath} does not exist")
+            if is_fastq(filepath) == False:
+                if is_fasta(filepath):
+                    raise ValueError(
+                        f"Input file {filepath} is a fasta file. AuriClass expects fastq files"
+                    )
+                else:
+                    raise ValueError(
+                        f"Input file {filepath} is not a fastq file. AuriClass expects fastq files"
+                    )
+
+        if not Path(self.reference_sketch_path).exists():
+            raise FileNotFoundError(
+                f"Reference sketch {self.reference_sketch_path} does not exist"
+            )
+
     def check_dependencies(self):
         """
         Check if dependencies are installed
@@ -77,21 +111,6 @@ class AuriClassAnalysis:
             )
         except FileNotFoundError:
             raise FileNotFoundError("mash is not installed")
-
-    def check_input_files(self):
-        """
-        Check if input files exist
-        """
-        # Check if read files exist
-        for read_path in self.read_paths:
-            if not Path(read_path).exists():
-                raise FileNotFoundError(f"Read file {read_path} does not exist")
-
-        # Check if reference sketch exists
-        if not Path(self.reference_sketch_path).exists():
-            raise FileNotFoundError(
-                f"Reference sketch {self.reference_sketch_path} does not exist"
-            )
 
     def sketch_query(self):
         """
@@ -174,28 +193,6 @@ class AuriClassAnalysis:
         self.mash_output = df
 
     def check_genome_size(self):
-        # Check if specified genome size range is valid
-        if self.genome_size_range[0] > self.genome_size_range[1]:
-            raise ValueError(
-                "Expected genome size range is invalid: lower bound is higher than upper bound"
-            )
-        elif self.genome_size_range[0] < 0:
-            raise ValueError(
-                "Expected genome size range is invalid: lower bound is lower than 0"
-            )
-        elif self.genome_size_range[1] < 0:
-            raise ValueError(
-                "Expected genome size range is invalid: upper bound is lower than 0"
-            )
-        elif (self.genome_size_range[0] < 100) & (self.genome_size_range[1] < 100):
-            logging.warning(
-                f"Expected genome size range boundaries {self.genome_size_range} are below 100: treating these as Mbp instead of bp"
-            )
-            self.genome_size_range = [
-                self.genome_size_range[0] * 1_000_000,
-                self.genome_size_range[1] * 1_000_000,
-            ]
-
         # Compare estimated genome size with expected genome size range
         if (
             self.estimated_genome_size < self.genome_size_range[0]
@@ -433,7 +430,7 @@ if __name__ == "__main__":
         "--n_threads",
         help="Number of threads.\nNOTE: multithreading has minimal effect on performance as mash sketch is single-threaded",
         default=1,
-        type=int,
+        type=check_number_within_range(0, 100),
     )
     main_args.add_argument(
         "--log_file_path",
@@ -465,19 +462,19 @@ if __name__ == "__main__":
         " 150 NCBI genomes and take mash genome size overestimation into account.",
         default=[11_400_000, 14_900_000],
         nargs=2,
-        type=float,
+        type=check_number_within_range(0, 100_000_000),
     )
     qc_args.add_argument(
         "--non_candida_threshold",
         help="If the minimal distance from a reference sample is above this threshold, the sample might not be a Candida sp.",
         default=0.02,
-        type=float,
+        type=check_number_within_range(0, 1),
     )
     qc_args.add_argument(
         "--new_clade_threshold",
         help="If the minimal distance from a reference sample is above this threshold, the sample might not be a known C. auris clade.",
         default=0.005,
-        type=float,
+        type=check_number_within_range(0, 1),
     )
 
     # Other arguments
@@ -501,17 +498,21 @@ if __name__ == "__main__":
         "--kmer_size",
         help="Kmer size",
         default=27,
-        type=int,
+        type=check_number_within_range(1, 32),
     )
     other_args.add_argument(
-        "-s", "--sketch_size", help="Sketch size", default=50_000, type=int
+        "-s",
+        "--sketch_size",
+        help="Sketch size",
+        default=50_000,
+        type=check_number_within_range(1000, 1_000_000),
     )
     other_args.add_argument(
         "-m",
         "--minimal_kmer_coverage",
         help="Minimal kmer coverage",
         default=3,
-        type=int,
+        type=check_number_within_range(1, 100),
     )
     args = parser.parse_args()
 
@@ -549,14 +550,15 @@ if __name__ == "__main__":
         minimal_kmer_coverage=args.minimal_kmer_coverage,
         n_threads=args.n_threads,
         clade_config_path=args.clade_config_path,
-        genome_size_range=args.expected_genome_size,
+        genome_size_range=[int(size) for size in args.expected_genome_size],
         non_candida_threshold=args.non_candida_threshold,
         new_clade_threshold=args.new_clade_threshold,
     )
 
     # Check dependencies
+    sample.validate_argument_logic()
+    sample.validate_input_files()
     sample.check_dependencies()
-    sample.check_input_files()
 
     # Sketch query genome using tempfile
     with tempfile.TemporaryDirectory() as tmpdir:

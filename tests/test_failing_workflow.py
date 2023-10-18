@@ -42,7 +42,7 @@ def test_nonexisting_input_files():
     )
     testsample.check_dependencies()
     with pytest.raises(FileNotFoundError):
-        testsample.check_input_files()
+        testsample.validate_input_files()
 
 
 def test_empty_input_files():
@@ -64,7 +64,6 @@ def test_empty_input_files():
         new_clade_threshold=0.005,
     )
     testsample.check_dependencies()
-    testsample.check_input_files()
 
     # Sketch query genome using tempfile
     with tempfile.TemporaryDirectory() as tmpdir:
