@@ -3,7 +3,7 @@ name: Test
 on: [push, pull_request]
 
 jobs:
-  unit tests:
+  unit_tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -23,7 +23,7 @@ jobs:
     - name: Run tests
       shell: bash -l {0}
       run: pytest
-  cli test:
+  cli_test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
