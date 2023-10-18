@@ -4,6 +4,7 @@ import argparse
 import logging
 import subprocess
 import tempfile
+from datetime import datetime
 from io import StringIO
 from pathlib import Path
 
@@ -97,7 +98,11 @@ class AuriClassAnalysis:
         """
         if lines:
             return "\n".join(
-                [f"[{tag}] {line}" for line in lines.split("\n") if line != ""]
+                [
+                    f"[{datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')} {tag}] {line}"
+                    for line in lines.split("\n")
+                    if line != ""
+                ]
             )
         else:
             return f"[{tag}]"
