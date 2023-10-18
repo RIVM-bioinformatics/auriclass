@@ -10,6 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from utils.general import add_tag
 from version import __description__, __package_name__, __version__
 
 
@@ -92,21 +93,6 @@ class AuriClassAnalysis:
                 f"Reference sketch {self.reference_sketch_path} does not exist"
             )
 
-    def add_tag(self, tag, lines):
-        """
-        Prepend a tag to text explaining from which analysis the message came.
-        """
-        if lines:
-            return "\n".join(
-                [
-                    f"[{datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S')} {tag}] {line}"
-                    for line in lines.split("\n")
-                    if line != ""
-                ]
-            )
-        else:
-            return f"[{tag}]"
-
     def sketch_query(self):
         """
         Sketch query genome
@@ -126,7 +112,7 @@ class AuriClassAnalysis:
             str(self.sketch_size),
             *self.read_paths,
         ]
-        logging.debug(self.add_tag("mash sketch", " ".join(command)))
+        logging.info(add_tag("mash sketch", " ".join(command)))
         output = subprocess.run(
             command,
             stdout=subprocess.PIPE,
@@ -139,8 +125,10 @@ class AuriClassAnalysis:
         # Add stdout and stderr to object
         self.stdout = output.stdout.decode("utf-8")
         stderr = output.stderr.decode("utf-8")
-        logging.debug(self.add_tag("mash sketch", output.stderr.decode("utf-8")))
-        # self.add_tag_to_stderr("mash sketch", stderr)
+        if stderr:
+            for line in stderr.splitlines():
+                logging.info(add_tag("mash sketch", line))
+        # add_tag_to_stderr("mash sketch", stderr)
 
         # find line with "Estimated genome size" and get value
         for line in stderr.splitlines():
@@ -164,14 +152,17 @@ class AuriClassAnalysis:
             self.reference_sketch_path,
             self.query_sketch_path,
         ]
-        logging.debug(self.add_tag("mash dist", " ".join(command)))
+        logging.info(add_tag("mash dist", " ".join(command)))
         output = subprocess.run(
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
         # Append stdout and stderr to object
-        logging.debug(self.add_tag("mash dist", output.stderr.decode("utf-8")))
+        stderr = output.stderr.decode("utf-8")
+        if stderr:
+            for line in stderr.splitlines():
+                logging.info(add_tag("mash dist", line))
         # Read output into pandas dataframe
         df = pd.read_csv(
             StringIO(output.stdout.decode("utf-8")),
@@ -277,13 +268,17 @@ class AuriClassAnalysis:
             "-p",
             str(self.probability),
         ]
-        logging.debug(self.add_tag("mash bounds", " ".join(command)))
+        logging.info(add_tag("mash bounds", " ".join(command)))
         output = subprocess.run(
             command,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        logging.debug(self.add_tag("mash bounds", output.stderr.decode("utf-8")))
+        stderr = output.stderr.decode("utf-8")
+        if stderr:
+            for line in stderr.splitlines():
+                logging.info(add_tag("mash bounds", line))
+
         return output.stdout.decode("utf-8")
 
     def process_error_bounds(self, error_bounds_text):
@@ -330,7 +325,7 @@ class AuriClassAnalysis:
         for distance in self.distances:
             if distance < (self.minimal_distance + self.error_bound):
                 logging.debug(
-                    self.add_tag(
+                    add_tag(
                         "compare_with_error_bounds",
                         f"distance {distance} is above threshold: ({self.minimal_distance} + {self.error_bound})",
                     )
@@ -338,7 +333,7 @@ class AuriClassAnalysis:
                 count_above_threshold += 1
             else:
                 logging.debug(
-                    self.add_tag(
+                    add_tag(
                         "compare_with_error_bounds",
                         f"distance {distance} is below threshold: ({self.minimal_distance} + {self.error_bound})",
                     )
@@ -431,6 +426,7 @@ if __name__ == "__main__":
         "--output_report_path",
         help="Path to output report",
         default="report.tsv",
+        type=Path,
     )
     main_args.add_argument(
         "-t",
@@ -440,8 +436,18 @@ if __name__ == "__main__":
         type=int,
     )
     main_args.add_argument(
+        "--log_file_path",
+        help="Path to log file",
+        type=Path,
+    )
+    main_args.add_argument(
         "--verbose",
         help="Verbose output",
+        action="store_true",
+    )
+    main_args.add_argument(
+        "--debug",
+        help="Very verbose output",
         action="store_true",
     )
     main_args.add_argument(
@@ -509,11 +515,27 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
+    if args.log_file_path:
+        log_file_path = args.log_file_path
+    else:
+        log_file_path = args.output_report_path.with_suffix(
+            f".{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+        )
+
     # Set logging format
-    logging.basicConfig(format="%(message)s")
+    logging.basicConfig(
+        filename=log_file_path,
+        filemode="w",
+        format="%(asctime)s %(levelname)s %(message)s",
+        datefmt="%H:%M:%S",
+    )
+    logging.getLogger().addHandler(logging.StreamHandler())
 
     # If -V is specified, set logging level to DEBUG
     if args.verbose:
+        logging.getLogger().setLevel(logging.INFO)
+
+    if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
     # Create object
