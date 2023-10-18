@@ -132,6 +132,10 @@ class AuriClassAnalysis:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
+        if "ERROR: Did not find fasta records in" in output.stderr.decode("utf-8"):
+            raise ValueError(
+                f"Did not find sequence records in {self.read_paths}. Please check if these are valid fastq files"
+            )
         # Add stdout and stderr to object
         self.stdout = output.stdout.decode("utf-8")
         stderr = output.stderr.decode("utf-8")
@@ -530,6 +534,7 @@ if __name__ == "__main__":
 
     # Check dependencies
     sample.check_dependencies()
+    sample.check_input_files()
 
     # Sketch query genome using tempfile
     with tempfile.TemporaryDirectory() as tmpdir:
