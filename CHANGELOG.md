@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.3.0](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.2.0...v0.3.0) (2023-10-19)
+
+
+### Features
+
+* expand reference ([c2ce051](https://github.com/RIVM-bioinformatics/auriclass/commit/c2ce0512dc912d5b4dec4a78e3f4b9fa3a4de24e))
+
+
+### Bug Fixes
+
+* set correct attr name ([306fbbc](https://github.com/RIVM-bioinformatics/auriclass/commit/306fbbcdb9fa89eaf050e106a98a72cc57057927))
+* type issue when setting genome size from cli ([5a45b24](https://github.com/RIVM-bioinformatics/auriclass/commit/5a45b24b94d4653a6612e3bd04f3794001813a73))
+
+
+### Documentation
+
+* add docstrings ([cb3fe6a](https://github.com/RIVM-bioinformatics/auriclass/commit/cb3fe6a5cbda1876d850b67abe434e8273f73c30))
+* add to README ([2472d53](https://github.com/RIVM-bioinformatics/auriclass/commit/2472d53d249462d27eed6ceaf13054e3db3c3a9e))
+
 ## [0.2.0](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.1.0...v0.2.0) (2023-10-18)
 
 
