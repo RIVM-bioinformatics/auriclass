@@ -732,8 +732,8 @@ if __name__ == "__main__":
 
     # Validate inputs before creating object
     validate_input_files(args.read_file_paths)
-    validate_input_files(args.reference_sketch_path)
-    validate_input_files(args.clade_config_path)
+    validate_input_files([args.reference_sketch_path])
+    validate_input_files([args.clade_config_path])
 
     for read_file_path in args.read_file_paths:
         is_fastq(read_file_path)
