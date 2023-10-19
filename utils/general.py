@@ -8,7 +8,19 @@ import pyfastx
 
 def add_tag(tag, lines):
     """
-    Prepend a tag to text explaining from which analysis the message came.
+    Add a tag to a string or list of strings.
+
+    Parameters
+    ----------
+    tag : str
+        The tag to add.
+    lines : str or list of str
+        The string or list of strings to add the tag to.
+
+    Returns
+    -------
+    str
+        The string with the tag added to each line.
     """
     full_tag = f"[{tag}]"
     if lines:
@@ -51,6 +63,23 @@ def check_number_within_range(minimum=0, maximum=1):
 
 
 def is_fastq(filepath):
+    """
+    Check if a file is a fastq file.
+
+    Parameters
+    ----------
+    filepath : str
+        The path to the file to check.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    RuntimeError
+        If the file is not a fastq file.
+    """
     try:
         pyfastx.Fastq(filepath, build_index=False)
     except RuntimeError:
@@ -60,6 +89,23 @@ def is_fastq(filepath):
 
 
 # def is_fasta(file):
+#     """
+#     Check if a file is a fasta file.
+
+#     Parameters
+#     ----------
+#     filepath : str
+#         The path to the file to check.
+
+#     Returns
+#     -------
+#     None
+
+#     Raises
+#     ------
+#     RuntimeError
+#         If the file is not a fasta file.
+#     """
 #     try:
 #         pyfastx.Fasta(file, build_index=False)
 #         return True
@@ -68,12 +114,47 @@ def is_fastq(filepath):
 
 
 def validate_input_files(list_of_files):
+    """
+    Check if files in a list exist.
+
+    Parameters
+    ----------
+    list_of_files : list of str
+        The list of filepaths to check.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    FileNotFoundError
+        If any of the files do not exist.
+    """
     for filepath in list_of_files:
         if not Path(filepath).exists():
             raise FileNotFoundError(f"Required input file {filepath} does not exist")
 
 
 def validate_argument_logic(args):
+    """
+    Check if arguments are valid, based on predefined logic.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        The arguments to check.
+
+    Returns
+    -------
+    argparse.Namespace
+        The arguments, if they are valid. Modified if necessary.
+
+    Raises
+    ------
+    ValueError
+        If the arguments are not valid.
+    """
     # Check if specified genome size range is valid
     if args.genome_size_range[0] > args.genome_size_range[1]:
         raise ValueError(
@@ -92,7 +173,20 @@ def validate_argument_logic(args):
 
 def check_dependencies():
     """
-    Check if dependencies are installed
+    Check if dependencies are installed.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    FileNotFoundError
+        If mash is not installed.
     """
     try:
         subprocess.call(
