@@ -467,7 +467,7 @@ if __name__ == "__main__":
     qc_args.add_argument(
         "--non_candida_threshold",
         help="If the minimal distance from a reference sample is above this threshold, the sample might not be a Candida sp.",
-        default=0.02,
+        default=0.01,
         type=check_number_within_range(0, 1),
     )
     qc_args.add_argument(
@@ -479,7 +479,7 @@ if __name__ == "__main__":
 
     # Other arguments
     other_args = parser.add_argument_group(
-        "Other arguments\nNOTE: Only change these settings if you are doing something special.\nNOTE: This will require rebuilding the reference sketch"
+        "Other arguments\nNOTE: Only change these settings if you are doing something special.\nNOTE: This will require rebuilding the reference sketch and recalibration of thresholds!"
     )
     other_args.add_argument(
         "-r",
@@ -545,14 +545,14 @@ if __name__ == "__main__":
         output_report_path=args.output_report_path,
         read_paths=args.read_file_paths,
         reference_sketch_path=args.reference_sketch_path,
-        kmer_size=args.kmer_size,
-        sketch_size=args.sketch_size,
-        minimal_kmer_coverage=args.minimal_kmer_coverage,
-        n_threads=args.n_threads,
+        kmer_size=int(args.kmer_size),
+        sketch_size=int(args.sketch_size),
+        minimal_kmer_coverage=int(args.minimal_kmer_coverage),
+        n_threads=int(args.n_threads),
         clade_config_path=args.clade_config_path,
         genome_size_range=[int(size) for size in args.expected_genome_size],
-        non_candida_threshold=args.non_candida_threshold,
-        new_clade_threshold=args.new_clade_threshold,
+        non_candida_threshold=float(args.non_candida_threshold),
+        new_clade_threshold=float(args.new_clade_threshold),
     )
 
     # Check dependencies

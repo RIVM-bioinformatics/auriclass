@@ -1,10 +1,25 @@
 filename,clade
-refs/GCA_002759435.2_Cand_auris_B8441_V2_genomic.fna,Clade I
-refs/GCA_003013715.2_ASM301371v2_genomic.fna,Clade II
-refs/GCA_002775015.1_Cand_auris_B11221_V1_genomic.fna,Clade III
-refs/GCA_003014415.1_Cand_auris_B11243_genomic.fna,Clade IV
-refs/GCA_016809505.1_ASM1680950v1_genomic.fna,Clade V
-refs/GCA_032367535.1_ASM3236753v1_genomic.fna,Clade VI
-refs/GCF_003013735.1_Cand_pseudohaemulonii_B12108_genomic.fna,outgroup
-refs/GCF_002926055.2_CanHae_1.0_genomic.fna,outgroup
-refs/GCF_000182965.3_ASM18296v3_genomic.fna,outgroup
+refs/GCA_002759435.2_Candida_auris_CladeI.fna,Clade I
+refs/GCA_002775015.1_Candida_auris_CladeIII.fna,Clade III
+refs/GCA_003013715.2_Candida_auris_CladeII.fna,CladeII
+refs/GCA_003014415.1_Candida_auris_CladeIV.fna,Clade IV
+refs/GCA_008275145.1_Candida_auris_CladeIV.fna,Clade IV
+refs/GCA_014217455.1_Candida_auris_CladeIII.fna,Clade III
+refs/GCA_014673535.1_Candida_auris_CladeI.fna,Clade I
+refs/GCA_016495665.1_Candida_auris_CladeII.fna,Clade II
+refs/GCA_016809505.1_Candida_auris_CladeV.fna,Clade V
+refs/GCA_032367535.1_Candida_auris_CladeVI.fna,Clade VI
+refs/GCA_032715285.1_Candida_auris_CladeVI.fna,Clade VI
+refs/GCF_000002545.3_Nakaseomyces_glabratus.fna,outgroup
+refs/GCF_000003835.1_Clavispora_lusitaniae.fna,outgroup
+refs/GCF_000006335.3_Candida_tropicalis.fna,outgroup
+refs/GCF_000006445.2_Debaryomyces_hansenii.fna,outgroup
+refs/GCF_000026945.1_Candida_dubliniensis.fna,outgroup
+refs/GCF_000149425.1_Meyerozyma_guilliermondii.fna,outgroup
+refs/GCF_000149685.1_Lodderomyces_elongisporus.fna,outgroup
+refs/GCF_000182765.1_Candida_parapsilosis.fna,outgroup
+refs/GCF_000182965.3_Candida_albicans.fna,outgroup
+refs/GCF_000315875.1_Candida_orthopsilosis.fna,outgroup
+refs/GCF_002926055.2_Candida_haemulonii.fna,outgroup
+refs/GCF_003013735.1_Candida_pseudohaemulonii.fna,outgroup
+refs/GCF_003054445.1_Pichia_kudriavzevii.fna,outgroup
