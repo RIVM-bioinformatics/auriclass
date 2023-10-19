@@ -155,6 +155,11 @@ def validate_argument_logic(args):
     ValueError
         If the arguments are not valid.
     """
+    # Convert to float
+    args.expected_genome_size = [
+        float(args.expected_genome_size[0]),
+        float(args.expected_genome_size[1]),
+    ]
     # Check if specified genome size range is valid
     if args.expected_genome_size[0] > args.expected_genome_size[1]:
         raise ValueError(
