@@ -4,6 +4,7 @@ import tempfile
 import pytest
 
 from auriclass import AuriClassAnalysis
+from utils.general import check_dependencies, is_fastq, validate_input_files
 
 os.makedirs("tmp_data", exist_ok=True)
 
@@ -40,9 +41,9 @@ def test_nonexisting_input_files():
         non_candida_threshold=0.1,
         new_clade_threshold=0.005,
     )
-    testsample.check_dependencies()
+    check_dependencies()
     with pytest.raises(FileNotFoundError):
-        testsample.validate_input_files()
+        validate_input_files(testsample.read_paths)
 
 
 def test_empty_input_files():
@@ -63,10 +64,35 @@ def test_empty_input_files():
         non_candida_threshold=0.1,
         new_clade_threshold=0.005,
     )
-    testsample.check_dependencies()
+    check_dependencies()
 
     # Sketch query genome using tempfile
     with tempfile.TemporaryDirectory() as tmpdir:
         testsample.query_sketch_path = f"{tmpdir}/tmpfile.msh"
         with pytest.raises(ValueError):
             testsample.sketch_query()
+
+
+def test_non_fastq_input_files():
+    """
+    Test if ValueError is raised when a non-fastq file is provided
+    """
+    testsample = AuriClassAnalysis(
+        name="test",
+        read_paths=["tests/data/NC_001416.1.fasta.gz"],
+        output_report_path="tmp_data/test_report.tsv",
+        reference_sketch_path="tests/data/ref_sketch.msh",
+        genome_size_range=(40_000, 60_000),
+        kmer_size=27,
+        sketch_size=50_000,
+        minimal_kmer_coverage=3,
+        n_threads=1,
+        clade_config_path="tests/data/clade_config.csv",
+        non_candida_threshold=0.1,
+        new_clade_threshold=0.005,
+    )
+    check_dependencies()
+    validate_input_files(testsample.read_paths)
+    with pytest.raises(RuntimeError):
+        for read_path in testsample.read_paths:
+            is_fastq(read_path)

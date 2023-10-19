@@ -10,7 +10,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from utils.general import add_tag, check_number_within_range, is_fasta, is_fastq
+from utils.general import (
+    add_tag,
+    check_dependencies,
+    check_number_within_range,
+    is_fastq,
+    validate_argument_logic,
+    validate_input_files,
+)
 from version import __description__, __package_name__, __version__
 
 
@@ -50,8 +57,8 @@ class AuriClassAnalysis:
         self.new_clade_threshold = new_clade_threshold
         self.qc_decision = None
         self.qc_genome_size = None
+        self.qc_other_candida = None
         self.qc_species = None
-        self.qc_distance = None
         self.qc_multiple_hits = None
         self.qc_new_clade = None
         self.query_sketch_path = None
@@ -64,59 +71,40 @@ class AuriClassAnalysis:
         self.mash_output = None
         self.distances = None
 
-    def validate_argument_logic(self):
-        # Check if specified genome size range is valid
-        if self.genome_size_range[0] > self.genome_size_range[1]:
-            raise ValueError(
-                "Expected genome size range is invalid: lower bound is higher than upper bound"
-            )
-        elif (self.genome_size_range[0] < 100) & (self.genome_size_range[1] < 100):
-            logging.warning(
-                f"Expected genome size range boundaries {self.genome_size_range} are below 100: treating these as Mbp instead of bp"
-            )
-            self.genome_size_range = [
-                self.genome_size_range[0] * 1_000_000,
-                self.genome_size_range[1] * 1_000_000,
-            ]
-
-    def validate_input_files(self):
-        for filepath in self.read_paths:
-            if not Path(filepath).exists():
-                raise FileNotFoundError(f"Read file {filepath} does not exist")
-            if is_fastq(filepath) == False:
-                if is_fasta(filepath):
-                    raise ValueError(
-                        f"Input file {filepath} is a fasta file. AuriClass expects fastq files"
-                    )
-                else:
-                    raise ValueError(
-                        f"Input file {filepath} is not a fastq file. AuriClass expects fastq files"
-                    )
-
-        if not Path(self.reference_sketch_path).exists():
-            raise FileNotFoundError(
-                f"Reference sketch {self.reference_sketch_path} does not exist"
-            )
-
-    def check_dependencies(self):
-        """
-        Check if dependencies are installed
-        """
-        # check if mash is installed
-        try:
-            subprocess.call(
-                ["mash", "-h"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except FileNotFoundError:
-            raise FileNotFoundError("mash is not installed")
-
     def sketch_query(self):
         """
-        Sketch query genome
+        Sketches the query fastq files using mash.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If no sequence records are found in the specified fastq file(s).
+
+            If the estimated genome size cannot be parsed from the mash sketch STDERR.
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - stdout: the STDOUT of the mash sketch command
+        - estimated_genome_size: the estimated genome size of the current test sample
+
+
+        The function uses the following attributes of the object:
+        - minimal_kmer_coverage: the minimal kmer coverage to use for the sketch
+        - query_sketch_path: the path to the query sketch
+        - kmer_size: the kmer size to use for the sketch
+        - sketch_size: the size of the sketch to create
+        - read_paths: the paths to the fastq files to sketch
         """
-        # run mash sketch and capture stdout and stderr
         command = [
             "mash",
             "sketch",
@@ -147,7 +135,6 @@ class AuriClassAnalysis:
         if stderr:
             for line in stderr.splitlines():
                 logging.info(add_tag("mash sketch", line))
-        # add_tag_to_stderr("mash sketch", stderr)
 
         # find line with "Estimated genome size" and get value
         for line in stderr.splitlines():
@@ -161,7 +148,28 @@ class AuriClassAnalysis:
 
     def run_mash(self):
         """
-        Run mash screen and predict clade
+        Run Mash dist and save results.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A DataFrame containing the results of the Mash dist, including the reference and query sequences,
+            the distance between them, the p-value, the number of matching hashes, and the predicted clade.
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - mash_output: a pandas DataFrame containing the output of the Mash distance calculation
+
+        The function uses the following attributes of the object:
+        - n_threads: the number of threads to use
+        - reference_sketch_path: the path to the reference sketch
+        - query_sketch_path: the path to the query sketch
         """
         command = [
             "mash",
@@ -189,11 +197,33 @@ class AuriClassAnalysis:
             header=None,
             names=["Reference", "Query", "Distance", "P-value", "Matching-hashes"],
         )
-        df["Clade"] = df["Reference"].map(self.clade_dict["clade"])
         self.mash_output = df
+        return df
 
     def check_genome_size(self):
-        # Compare estimated genome size with expected genome size range
+        """
+        Compare the estimated genome size with the expected genome size range.
+
+        If the estimated genome size is outside the expected range, a warning message is logged and the
+        `qc_genome_size` attribute is set to "WARN: genome size outside expected range".
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - qc_genome_size: a warning message if the estimated genome size is outside the expected range
+
+        The function uses the following attributes of the object:
+        - estimated_genome_size: the estimated genome size of the current sample
+        """
         if (
             self.estimated_genome_size < self.genome_size_range[0]
             or self.estimated_genome_size > self.genome_size_range[1]
@@ -205,7 +235,27 @@ class AuriClassAnalysis:
 
     def select_clade(self):
         """
-        Select closest sample and corresponding clade
+        Selects the closest reference sample and corresponding clade.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - closest_sample: the closest reference sample to the current test sample
+        - clade: the clade of the closest reference sample
+        - minimal_distance: the minimal distance between the current test sample and the closest reference sample
+
+        The function uses the following attributes of the object:
+        - mash_output: a pandas DataFrame containing the output of the Mash distance calculation
+        - clade_dict: a dictionary containing the clade information for each reference sample
         """
         # Get highest hit, by sorting on distance and selecting first hit
         self.closest_sample = self.mash_output.sort_values("Distance").iloc[0][
@@ -219,26 +269,65 @@ class AuriClassAnalysis:
         ].values[0]
 
     def check_non_candida(self):
-        # Check if distance is higher than self.non_candida_threshold
-        # If higher, this is probably not Candida
+        """
+        Check if the distance to the closest sample is higher than the non-Candida threshold.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        bool
+            True if the distance to the closest sample is lower than or equal to the non-Candida threshold, False otherwise.
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - qc_species: a warning message if the distance to the closest sample is higher than the non-Candida threshold
+
+        The function uses the following attributes of the object:
+        - minimal_distance: the minimal distance between the current test sample and the closest reference sample
+        - non_candida_threshold: the threshold above which the distance to the closest sample is considered to be non-Candida
+        """
         if self.minimal_distance > self.non_candida_threshold:
             logging.warning(
                 f"AuriClass found a distance of {self.minimal_distance} to the closest sample, please ensure this is Candida auris"
             )
-            self.qc_distance = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
+            self.qc_species = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
             return False
         else:
             return True
 
     def check_for_outgroup(self):
         """
-        Check if closest sample is outgroup
+        Check if the closest sample is defined as outgroup.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        bool
+            True if the closest sample is not an outgroup, False otherwise.
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - qc_other_candida: a warning message if the closest sample is defined as outgroup
+
+        The function uses the following attributes of the object:
+        - clade: the clade of the closest reference sample
+        - closest_sample: the closest reference sample to the current test sample
         """
         if self.clade == "outgroup":
             logging.warning(
                 f"AuriClass found a non-Candida auris reference as closest sample, please ensure this is Candida auris"
             )
-            self.qc_species = (
+            self.qc_other_candida = (
                 f"WARN: outgroup reference {self.closest_sample} as closest sample"
             )
             return False
@@ -246,7 +335,26 @@ class AuriClassAnalysis:
             return True
 
     def check_possible_new_clade(self):
-        # Check if closest sample is above 0.005 distance --> new clade?
+        """
+        Check if the closest sample is above 0.005 distance. If it is, it may indicate a new clade.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - qc_new_clade: a warning message if the closest sample is above 0.005 distance
+
+        The function uses the following attributes of the object:
+        - minimal_distance: the minimal distance between the current test sample and the closest reference sample
+        """
         if self.minimal_distance > 0.005:
             logging.warning(
                 f"AuriClass found a distance of {self.minimal_distance} to the closest sample, please ensure this is Candida auris"
@@ -255,7 +363,23 @@ class AuriClassAnalysis:
 
     def get_error_bounds(self):
         """
-        Get mash error bounds and return
+        Get error bounds for the current sketch size and kmer size.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        str
+            The STDOUT of the mash bounds command.
+
+        Notes
+        -----
+        The function uses the following attributes of the object:
+        - kmer_size: the kmer size to use for the sketch
+        - probability: the probability to use for the mash bounds command
         """
         command = [
             "mash",
@@ -280,8 +404,28 @@ class AuriClassAnalysis:
 
     def process_error_bounds(self, error_bounds_text):
         """
-        Reads text content and takes lines after line which contains "Mash distance" and before "Screen distance" (irrespective of preceding whitespace) .
-        Content is read into a pandas dataframe.
+        Process the error bounds text to get the error bound for the current sketch size and kmer size.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+        error_bounds_text : str
+            The STDOUT of the mash bounds command.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - error_bound: the error bound for the current sketch size and kmer size
+
+
+        The function uses the following attributes of the object:
+        - sketch_size: the size of the sketch to create
+        - minimal_distance: the minimal distance between the current test sample and the closest reference sample
         """
         # Split text into lines
         lines = error_bounds_text.splitlines()
@@ -311,7 +455,29 @@ class AuriClassAnalysis:
 
     def compare_with_error_bounds(self):
         """
-        Compare error_bound with distance between highest hit and other samples
+        Compare the distance between the current test sample and the closest reference sample with the error bound.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - distances: the distances between the current test sample and all other reference samples
+        - samples_within_error_bound: the number of samples within the error bound of the closest sample
+        - qc_multiple_hits: a warning message if the number of samples within the error bound of the closest sample is higher than 0
+
+        The function uses the following attributes of the object:
+        - mash_output: a pandas DataFrame containing the output of the Mash distance calculation
+        - closest_sample: the closest reference sample to the current test sample
+        - minimal_distance: the minimal distance between the current test sample and the closest reference sample
+        - error_bound: the error bound for the current sketch size and kmer size
         """
         # Get distance between highest hit and other samples
         self.distances = self.mash_output.loc[
@@ -347,19 +513,44 @@ class AuriClassAnalysis:
 
     def save_report(self):
         """
-        Write tsv row of sample name, clade, distance and number of samples within error bound, with column names
+        Save the report to a TSV file.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - qc_decision: the QC decision based on the QC attributes
+
+        The function uses the following attributes of the object:
+        - qc_species: a warning message if the distance to the closest sample is higher than the non-Candida threshold
+        - qc_other_candida: a warning message if the closest sample is defined as outgroup
+        - qc_genome_size: a warning message if the estimated genome size is outside the expected range
+        - qc_multiple_hits: a warning message if the number of samples within the error bound of the closest sample is higher than 0
+        - qc_new_clade: a warning message if the closest sample is above 0.005 distance
+        - name: the name of the current test sample
+        - clade: the clade of the closest reference sample
+        - minimal_distance: the minimal distance between the current test sample and the closest reference sample
+        - output_report_path: the path to the output report
         """
         # Check if any of the qc attributes contain "WARN"
         if any(
             [
-                self.qc_distance,
+                self.qc_species,
             ]
         ):
             self.qc_decision = "FAIL"
         elif any(
             [
                 self.qc_genome_size,
-                self.qc_species,
+                self.qc_other_candida,
                 self.qc_multiple_hits,
                 self.qc_new_clade,
             ]
@@ -375,9 +566,9 @@ class AuriClassAnalysis:
                     self.clade,
                     self.minimal_distance,
                     self.qc_decision,
-                    self.qc_genome_size,
                     self.qc_species,
-                    self.qc_distance,
+                    self.qc_other_candida,
+                    self.qc_genome_size,
                     self.qc_multiple_hits,
                     self.qc_new_clade,
                 ]
@@ -387,9 +578,9 @@ class AuriClassAnalysis:
                 "Clade",
                 "Mash_distance_from_closest_reference",
                 "QC_decision",
-                "QC_genome_size",
                 "QC_species",
-                "QC_distance",
+                "QC_other_Candida",
+                "QC_genome_size",
                 "QC_multiple_hits",
                 "QC_possible_new_clade",
             ],
@@ -467,7 +658,7 @@ if __name__ == "__main__":
     qc_args.add_argument(
         "--non_candida_threshold",
         help="If the minimal distance from a reference sample is above this threshold, the sample might not be a Candida sp.",
-        default=0.02,
+        default=0.01,
         type=check_number_within_range(0, 1),
     )
     qc_args.add_argument(
@@ -479,7 +670,7 @@ if __name__ == "__main__":
 
     # Other arguments
     other_args = parser.add_argument_group(
-        "Other arguments\nNOTE: Only change these settings if you are doing something special.\nNOTE: This will require rebuilding the reference sketch"
+        "Other arguments\nNOTE: Only change these settings if you are doing something special.\nNOTE: This will require rebuilding the reference sketch and recalibration of thresholds!"
     )
     other_args.add_argument(
         "-r",
@@ -539,26 +730,34 @@ if __name__ == "__main__":
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
+    # Validate inputs before creating object
+    validate_input_files(args.read_file_paths)
+    validate_input_files([args.reference_sketch_path])
+    validate_input_files([args.clade_config_path])
+
+    for read_file_path in args.read_file_paths:
+        is_fastq(read_file_path)
+
+    args = validate_argument_logic(args)
+
+    # Check dependencies
+    check_dependencies()
+
     # Create object
     sample = AuriClassAnalysis(
         name=args.name,
         output_report_path=args.output_report_path,
         read_paths=args.read_file_paths,
         reference_sketch_path=args.reference_sketch_path,
-        kmer_size=args.kmer_size,
-        sketch_size=args.sketch_size,
-        minimal_kmer_coverage=args.minimal_kmer_coverage,
-        n_threads=args.n_threads,
+        kmer_size=int(args.kmer_size),
+        sketch_size=int(args.sketch_size),
+        minimal_kmer_coverage=int(args.minimal_kmer_coverage),
+        n_threads=int(args.n_threads),
         clade_config_path=args.clade_config_path,
         genome_size_range=[int(size) for size in args.expected_genome_size],
-        non_candida_threshold=args.non_candida_threshold,
-        new_clade_threshold=args.new_clade_threshold,
+        non_candida_threshold=float(args.non_candida_threshold),
+        new_clade_threshold=float(args.new_clade_threshold),
     )
-
-    # Check dependencies
-    sample.validate_argument_logic()
-    sample.validate_input_files()
-    sample.check_dependencies()
 
     # Sketch query genome using tempfile
     with tempfile.TemporaryDirectory() as tmpdir:
