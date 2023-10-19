@@ -50,8 +50,8 @@ class AuriClassAnalysis:
         self.new_clade_threshold = new_clade_threshold
         self.qc_decision = None
         self.qc_genome_size = None
+        self.qc_other_candida = None
         self.qc_species = None
-        self.qc_distance = None
         self.qc_multiple_hits = None
         self.qc_new_clade = None
         self.query_sketch_path = None
@@ -225,7 +225,7 @@ class AuriClassAnalysis:
             logging.warning(
                 f"AuriClass found a distance of {self.minimal_distance} to the closest sample, please ensure this is Candida auris"
             )
-            self.qc_distance = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
+            self.qc_species = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
             return False
         else:
             return True
@@ -238,7 +238,7 @@ class AuriClassAnalysis:
             logging.warning(
                 f"AuriClass found a non-Candida auris reference as closest sample, please ensure this is Candida auris"
             )
-            self.qc_species = (
+            self.qc_other_candida = (
                 f"WARN: outgroup reference {self.closest_sample} as closest sample"
             )
             return False
@@ -352,14 +352,14 @@ class AuriClassAnalysis:
         # Check if any of the qc attributes contain "WARN"
         if any(
             [
-                self.qc_distance,
+                self.qc_species,
             ]
         ):
             self.qc_decision = "FAIL"
         elif any(
             [
                 self.qc_genome_size,
-                self.qc_species,
+                self.qc_other_candida,
                 self.qc_multiple_hits,
                 self.qc_new_clade,
             ]
@@ -375,9 +375,9 @@ class AuriClassAnalysis:
                     self.clade,
                     self.minimal_distance,
                     self.qc_decision,
-                    self.qc_genome_size,
                     self.qc_species,
-                    self.qc_distance,
+                    self.qc_other_candida,
+                    self.qc_genome_size,
                     self.qc_multiple_hits,
                     self.qc_new_clade,
                 ]
@@ -387,9 +387,9 @@ class AuriClassAnalysis:
                 "Clade",
                 "Mash_distance_from_closest_reference",
                 "QC_decision",
-                "QC_genome_size",
                 "QC_species",
-                "QC_distance",
+                "QC_other_Candida",
+                "QC_genome_size",
                 "QC_multiple_hits",
                 "QC_possible_new_clade",
             ],
