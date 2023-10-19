@@ -156,17 +156,17 @@ def validate_argument_logic(args):
         If the arguments are not valid.
     """
     # Check if specified genome size range is valid
-    if args.genome_size_range[0] > args.genome_size_range[1]:
+    if args.expected_genome_size[0] > args.expected_genome_size[1]:
         raise ValueError(
             "Expected genome size range is invalid: lower bound is higher than upper bound"
         )
-    elif (args.genome_size_range[0] < 100) & (args.genome_size_range[1] < 100):
+    elif (args.expected_genome_size[0] < 100) & (args.expected_genome_size[1] < 100):
         logging.warning(
-            f"Expected genome size range boundaries {args.genome_size_range} are below 100: treating these as Mbp instead of bp"
+            f"Expected genome size range boundaries {args.expected_genome_size} are below 100: treating these as Mbp instead of bp"
         )
-        args.genome_size_range = [
-            args.genome_size_range[0] * 1_000_000,
-            args.genome_size_range[1] * 1_000_000,
+        args.expected_genome_size = [
+            args.expected_genome_size[0] * 1_000_000,
+            args.expected_genome_size[1] * 1_000_000,
         ]
     return args
 
