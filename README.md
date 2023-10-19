@@ -147,11 +147,11 @@ NOTE: This will require rebuilding the reference sketch and recalibration of thr
 
 Under the hood, AuriClass does the following:
 
-1. Read in arguments, with some basic validation.
-2. Create an object of the `AuriClassAnalysis` class, setting attributes parsed from the CLI.
-3. Perform extra validation on arguments.
-4. Validate input files: check if sample files exist and if input sequences are Fastq format.
-5. Check whether dependencies are installed (currently only Mash)
+1. Read in arguments using `argparse`, with some basic validation.
+2. Perform extra validation on arguments.
+3. Validate input files: check if sample files exist and if input sequences are Fastq format.
+4. Check whether dependencies are installed (currently only Mash)
+5. Create an object of the `AuriClassAnalysis` class, setting attributes parsed from the CLI.
 6. Sketch the reads of the input sample and save to a temporary file.
 7. Run `mash dist` on sample and reference sketches.
 8. Check whether the estimated genome size (parsed from `mash sketch` STDERR) is within the expected range.
@@ -164,11 +164,11 @@ Under the hood, AuriClass does the following:
 
 ## FAQ
 
-- I get the error `Input file {filepath} is a fasta file. AuriClass expects fastq files` or `Input file {filepath} is not a fastq file. AuriClass expects fastq files`. How do I solve this?
+- I get the error `Input file {filepath} is not a fastq file. AuriClass expects fastq files`. How do I solve this?
 
 This happens when the `pyfastx` library cannot parse the input file(s) as FASTQ. Please check whether the files are correctly formatted and not corrupted. Plain and gzipped Fastq files should work fine, other compression algorithms might not be supported. Check [pyfastx docs](https://pyfastx.readthedocs.io/en/latest/) for more information.
 
-- I get the error `mash is not installed`. How do I solve this?
+- I get the error `Mash is not installed`. How do I solve this?
 
 AuriClass relies on the availability of a Mash executable. Dependencies like mash and pyfastx can e.g. be installed through mamba/conda.
 

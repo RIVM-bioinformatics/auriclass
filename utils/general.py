@@ -1,4 +1,7 @@
 import argparse
+import logging
+import subprocess
+from pathlib import Path
 
 import pyfastx
 
@@ -47,17 +50,55 @@ def check_number_within_range(minimum=0, maximum=1):
     return generated_func_check_range
 
 
-def is_fastq(file):
+def is_fastq(filepath):
     try:
-        pyfastx.Fastq(file, build_index=False)
-        return True
+        pyfastx.Fastq(filepath, build_index=False)
     except RuntimeError:
-        return False
+        raise RuntimeError(
+            f"Input file {filepath} is not a fastq file. AuriClass expects fastq files"
+        )
 
 
-def is_fasta(file):
+# def is_fasta(file):
+#     try:
+#         pyfastx.Fasta(file, build_index=False)
+#         return True
+#     except RuntimeError:
+#         return False
+
+
+def validate_input_files(list_of_files):
+    for filepath in list_of_files:
+        if not Path(filepath).exists():
+            raise FileNotFoundError(f"Required input file {filepath} does not exist")
+
+
+def validate_argument_logic(args):
+    # Check if specified genome size range is valid
+    if args.genome_size_range[0] > args.genome_size_range[1]:
+        raise ValueError(
+            "Expected genome size range is invalid: lower bound is higher than upper bound"
+        )
+    elif (args.genome_size_range[0] < 100) & (args.genome_size_range[1] < 100):
+        logging.warning(
+            f"Expected genome size range boundaries {args.genome_size_range} are below 100: treating these as Mbp instead of bp"
+        )
+        args.genome_size_range = [
+            args.genome_size_range[0] * 1_000_000,
+            args.genome_size_range[1] * 1_000_000,
+        ]
+    return args
+
+
+def check_dependencies():
+    """
+    Check if dependencies are installed
+    """
     try:
-        pyfastx.Fasta(file, build_index=False)
-        return True
-    except RuntimeError:
-        return False
+        subprocess.call(
+            ["mash", "-h"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except FileNotFoundError:
+        raise FileNotFoundError("Mash is not installed")

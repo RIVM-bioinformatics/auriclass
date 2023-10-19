@@ -10,7 +10,14 @@ from pathlib import Path
 
 import pandas as pd
 
-from utils.general import add_tag, check_number_within_range, is_fasta, is_fastq
+from utils.general import (
+    add_tag,
+    check_dependencies,
+    check_number_within_range,
+    is_fastq,
+    validate_argument_logic,
+    validate_input_files,
+)
 from version import __description__, __package_name__, __version__
 
 
@@ -63,54 +70,6 @@ class AuriClassAnalysis:
         self.stderr = None
         self.mash_output = None
         self.distances = None
-
-    def validate_argument_logic(self):
-        # Check if specified genome size range is valid
-        if self.genome_size_range[0] > self.genome_size_range[1]:
-            raise ValueError(
-                "Expected genome size range is invalid: lower bound is higher than upper bound"
-            )
-        elif (self.genome_size_range[0] < 100) & (self.genome_size_range[1] < 100):
-            logging.warning(
-                f"Expected genome size range boundaries {self.genome_size_range} are below 100: treating these as Mbp instead of bp"
-            )
-            self.genome_size_range = [
-                self.genome_size_range[0] * 1_000_000,
-                self.genome_size_range[1] * 1_000_000,
-            ]
-
-    def validate_input_files(self):
-        for filepath in self.read_paths:
-            if not Path(filepath).exists():
-                raise FileNotFoundError(f"Read file {filepath} does not exist")
-            if is_fastq(filepath) == False:
-                if is_fasta(filepath):
-                    raise ValueError(
-                        f"Input file {filepath} is a fasta file. AuriClass expects fastq files"
-                    )
-                else:
-                    raise ValueError(
-                        f"Input file {filepath} is not a fastq file. AuriClass expects fastq files"
-                    )
-
-        if not Path(self.reference_sketch_path).exists():
-            raise FileNotFoundError(
-                f"Reference sketch {self.reference_sketch_path} does not exist"
-            )
-
-    def check_dependencies(self):
-        """
-        Check if dependencies are installed
-        """
-        # check if mash is installed
-        try:
-            subprocess.call(
-                ["mash", "-h"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except FileNotFoundError:
-            raise FileNotFoundError("mash is not installed")
 
     def sketch_query(self):
         """
@@ -539,6 +498,19 @@ if __name__ == "__main__":
     if args.debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
+    # Validate inputs before creating object
+    validate_input_files(args.read_file_paths)
+    validate_input_files(args.reference_sketch_path)
+    validate_input_files(args.clade_config_path)
+
+    for read_file_path in args.read_file_paths:
+        is_fastq(read_file_path)
+
+    args = validate_argument_logic(args)
+
+    # Check dependencies
+    check_dependencies()
+
     # Create object
     sample = AuriClassAnalysis(
         name=args.name,
@@ -554,11 +526,6 @@ if __name__ == "__main__":
         non_candida_threshold=float(args.non_candida_threshold),
         new_clade_threshold=float(args.new_clade_threshold),
     )
-
-    # Check dependencies
-    sample.validate_argument_logic()
-    sample.validate_input_files()
-    sample.check_dependencies()
 
     # Sketch query genome using tempfile
     with tempfile.TemporaryDirectory() as tmpdir:
