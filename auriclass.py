@@ -12,11 +12,13 @@ from typing import Any, Dict, Hashable, List, Union
 import pandas as pd
 
 from utils.args import auriclass_arg_parser
-from utils.classes import FastaAuriclass, FastqAuriclass
+
+# from utils.classes import FastaAuriclass, FastqAuriclass
 from utils.general import (
     add_tag,
     check_dependencies,
     check_number_within_range,
+    guess_input_type,
     is_fastq,
     validate_argument_logic,
     validate_input_files,
@@ -25,7 +27,7 @@ from utils.version import __description__, __package_name__, __version__
 
 
 # define class Sample
-class AuriClassAnalysis:
+class BasicAuriclass:
     def __init__(
         self,
         name: str,
@@ -76,83 +78,7 @@ class AuriClassAnalysis:
         self.mash_output: pd.DataFrame = pd.DataFrame()
         self.distances: List[float] = [float()]
 
-    def sketch_query(self) -> None:
-        """
-        Sketches the query fastq files using mash.
-
-        Parameters
-        ----------
-        self : object
-            The AuriClassAnalysis object.
-
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        ValueError
-            If no sequence records are found in the specified fastq file(s).
-
-            If the estimated genome size cannot be parsed from the mash sketch STDERR.
-
-        Notes
-        -----
-        This function sets the following attributes of the object:
-        - stdout: the STDOUT of the mash sketch command
-        - estimated_genome_size: the estimated genome size of the current test sample
-
-
-        The function uses the following attributes of the object:
-        - minimal_kmer_coverage: the minimal kmer coverage to use for the sketch
-        - query_sketch_path: the path to the query sketch
-        - kmer_size: the kmer size to use for the sketch
-        - sketch_size: the size of the sketch to create
-        - read_paths: the paths to the fastq files to sketch
-        """
-        command = [
-            "mash",
-            "sketch",
-            "-r",
-            "-m",
-            str(self.minimal_kmer_coverage),
-            "-o",
-            self.query_sketch_path,
-            "-k",
-            str(self.kmer_size),
-            "-s",
-            str(self.sketch_size),
-            *self.read_paths,
-        ]
-        command_list_of_str = [str(item) for item in command]
-        logging.info(add_tag("mash sketch", " ".join(command_list_of_str)))
-        output = subprocess.run(
-            command_list_of_str,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        if "ERROR: Did not find fasta records in" in output.stderr.decode("utf-8"):
-            raise ValueError(
-                f"Did not find sequence records in {self.read_paths}. Please check if these are valid fastq files"
-            )
-        # Add stdout and stderr to object
-        self.stdout = output.stdout.decode("utf-8")
-        stderr = output.stderr.decode("utf-8")
-        if stderr:
-            for line in stderr.splitlines():
-                logging.info(add_tag("mash sketch", line))
-
-        # find line with "Estimated genome size" and get value
-        for line in stderr.splitlines():
-            if "Estimated genome size" in line:
-                self.estimated_genome_size = float(line.split()[-1])
-                break
-        else:
-            raise ValueError(
-                "Estimated genome size could not be parsed from mash sketch STDERR"
-            )
-
-    def run_mash(self) -> pd.DataFrame:
+    def run_mash_dist(self) -> pd.DataFrame:
         """
         Run Mash dist and save results.
 
@@ -206,39 +132,6 @@ class AuriClassAnalysis:
         )
         self.mash_output = df
         return df
-
-    def check_genome_size(self) -> None:
-        """
-        Compare the estimated genome size with the expected genome size range.
-
-        If the estimated genome size is outside the expected range, a warning message is logged and the
-        `qc_genome_size` attribute is set to "WARN: genome size outside expected range".
-
-        Parameters
-        ----------
-        self : object
-            The AuriClassAnalysis object.
-
-        Returns
-        -------
-        None
-
-        Notes
-        -----
-        This function sets the following attributes of the object:
-        - qc_genome_size: a warning message if the estimated genome size is outside the expected range
-
-        The function uses the following attributes of the object:
-        - estimated_genome_size: the estimated genome size of the current sample
-        """
-        if (
-            self.estimated_genome_size < self.genome_size_range[0]
-            or self.estimated_genome_size > self.genome_size_range[1]
-        ):
-            logging.warning(
-                f"AuriClass estimated genome size of {self.estimated_genome_size} is outside the expected range of {self.genome_size_range}"
-            )
-            self.qc_genome_size = "WARN: genome size outside expected range"
 
     def select_clade(self) -> None:
         """
@@ -594,14 +487,125 @@ class AuriClassAnalysis:
             ],
         ).replace("", "-").to_csv(self.output_report_path, sep="\t", index=False)
 
+
+class FastqAuriclass(BasicAuriclass):
+    def sketch_fastq_query(self) -> None:
+        """
+        Sketches the query fastq files using mash.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        ValueError
+            If no sequence records are found in the specified fastq file(s).
+
+            If the estimated genome size cannot be parsed from the mash sketch STDERR.
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - stdout: the STDOUT of the mash sketch command
+        - estimated_genome_size: the estimated genome size of the current test sample
+
+
+        The function uses the following attributes of the object:
+        - minimal_kmer_coverage: the minimal kmer coverage to use for the sketch
+        - query_sketch_path: the path to the query sketch
+        - kmer_size: the kmer size to use for the sketch
+        - sketch_size: the size of the sketch to create
+        - read_paths: the paths to the fastq files to sketch
+        """
+        command = [
+            "mash",
+            "sketch",
+            "-r",
+            "-m",
+            str(self.minimal_kmer_coverage),
+            "-o",
+            self.query_sketch_path,
+            "-k",
+            str(self.kmer_size),
+            "-s",
+            str(self.sketch_size),
+            *self.read_paths,
+        ]
+        command_list_of_str = [str(item) for item in command]
+        logging.info(add_tag("mash sketch", " ".join(command_list_of_str)))
+        output = subprocess.run(
+            command_list_of_str,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+        if "ERROR: Did not find fasta records in" in output.stderr.decode("utf-8"):
+            raise ValueError(
+                f"Did not find sequence records in {self.read_paths}. Please check if these are valid fastq files"
+            )
+        # Add stdout and stderr to object
+        self.stdout = output.stdout.decode("utf-8")
+        stderr = output.stderr.decode("utf-8")
+        if stderr:
+            for line in stderr.splitlines():
+                logging.info(add_tag("mash sketch", line))
+
+        # find line with "Estimated genome size" and get value
+        for line in stderr.splitlines():
+            if "Estimated genome size" in line:
+                self.estimated_genome_size = float(line.split()[-1])
+                break
+        else:
+            raise ValueError(
+                "Estimated genome size could not be parsed from mash sketch STDERR"
+            )
+
+    def check_genome_size(self) -> None:
+        """
+        Compare the estimated genome size with the expected genome size range.
+
+        If the estimated genome size is outside the expected range, a warning message is logged and the
+        `qc_genome_size` attribute is set to "WARN: genome size outside expected range".
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - qc_genome_size: a warning message if the estimated genome size is outside the expected range
+
+        The function uses the following attributes of the object:
+        - estimated_genome_size: the estimated genome size of the current sample
+        """
+        if (
+            self.estimated_genome_size < self.genome_size_range[0]
+            or self.estimated_genome_size > self.genome_size_range[1]
+        ):
+            logging.warning(
+                f"AuriClass estimated genome size of {self.estimated_genome_size} is outside the expected range of {self.genome_size_range}"
+            )
+            self.qc_genome_size = "WARN: genome size outside expected range"
+
     def run(self) -> None:
         # Sketch query genome using tempfile
         with tempfile.TemporaryDirectory() as tmpdir:
             self.query_sketch_path = Path(tmpdir).joinpath("tmpfile.msh")
-            self.sketch_query()
+            self.sketch_fastq_query()
 
             # Run mash screen
-            self.run_mash()
+            self.run_mash_dist()
 
         # Check if genome size is within expected range
         self.check_genome_size()
@@ -672,28 +676,30 @@ def main() -> None:
     # Check dependencies
     check_dependencies()
 
-    # if args.fastq:
-    #     input_type = "fastq"
-    # elif args.fasta:
-    #     input_type = "fasta"
-    # else:
-    #     input_type = guess_input_type(args.read_file_paths)
+    # Get input type from args and guess otherwise
+    if args.fastq:
+        input_type = "fastq"
+    elif args.fasta:
+        input_type = "fasta"
+    else:
+        input_type = guess_input_type(args.read_file_paths)
 
-    # if input_type == "fastq":
-    #     sample = FastqAuriclass(
-    #         name=args.name,
-    #         output_report_path=args.output_report_path,
-    #         read_paths=args.read_file_paths,
-    #         reference_sketch_path=args.reference_sketch_path,
-    #         kmer_size=int(args.kmer_size),
-    #         sketch_size=int(args.sketch_size),
-    #         minimal_kmer_coverage=int(args.minimal_kmer_coverage),
-    #         n_threads=int(args.n_threads),
-    #         clade_config_path=args.clade_config_path,
-    #         genome_size_range=[int(size) for size in args.expected_genome_size],
-    #         non_candida_threshold=float(args.non_candida_threshold),
-    #         new_clade_threshold=float(args.new_clade_threshold),
-    #     )
+    # Create object
+    if input_type == "fastq":
+        sample = FastqAuriclass(
+            name=args.name,
+            output_report_path=args.output_report_path,
+            read_paths=args.read_file_paths,
+            reference_sketch_path=args.reference_sketch_path,
+            kmer_size=int(args.kmer_size),
+            sketch_size=int(args.sketch_size),
+            minimal_kmer_coverage=int(args.minimal_kmer_coverage),
+            n_threads=int(args.n_threads),
+            clade_config_path=args.clade_config_path,
+            genome_size_range=[int(size) for size in args.expected_genome_size],
+            non_candida_threshold=float(args.non_candida_threshold),
+            new_clade_threshold=float(args.new_clade_threshold),
+        )
     # elif input_type == "fasta":
     #     sample = FastaAuriclass(
     #         name=args.name,
@@ -710,25 +716,26 @@ def main() -> None:
     #         new_clade_threshold=float(args.new_clade_threshold),
     #     )
 
-    # sample.run()
-
-    # Create object
-    sample = AuriClassAnalysis(
-        name=args.name,
-        output_report_path=args.output_report_path,
-        read_paths=args.read_file_paths,
-        reference_sketch_path=args.reference_sketch_path,
-        kmer_size=int(args.kmer_size),
-        sketch_size=int(args.sketch_size),
-        minimal_kmer_coverage=int(args.minimal_kmer_coverage),
-        n_threads=int(args.n_threads),
-        clade_config_path=args.clade_config_path,
-        genome_size_range=[int(size) for size in args.expected_genome_size],
-        non_candida_threshold=float(args.non_candida_threshold),
-        new_clade_threshold=float(args.new_clade_threshold),
-    )
-
+    # Run object
     sample.run()
+
+    # # Create object
+    # sample = AuriClassAnalysis(
+    #     name=args.name,
+    #     output_report_path=args.output_report_path,
+    #     read_paths=args.read_file_paths,
+    #     reference_sketch_path=args.reference_sketch_path,
+    #     kmer_size=int(args.kmer_size),
+    #     sketch_size=int(args.sketch_size),
+    #     minimal_kmer_coverage=int(args.minimal_kmer_coverage),
+    #     n_threads=int(args.n_threads),
+    #     clade_config_path=args.clade_config_path,
+    #     genome_size_range=[int(size) for size in args.expected_genome_size],
+    #     non_candida_threshold=float(args.non_candida_threshold),
+    #     new_clade_threshold=float(args.new_clade_threshold),
+    # )
+
+    # sample.run()
 
 
 if __name__ == "__main__":

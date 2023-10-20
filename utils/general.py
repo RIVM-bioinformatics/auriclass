@@ -65,7 +65,7 @@ def check_number_within_range(
     return generated_func_check_range
 
 
-def is_fastq(filepath: str) -> None:
+def is_fastq(file: str) -> bool:
     """
     Check if a file is a fastq file.
 
@@ -84,36 +84,35 @@ def is_fastq(filepath: str) -> None:
         If the file is not a fastq file.
     """
     try:
-        pyfastx.Fastq(filepath, build_index=False)
+        pyfastx.Fastq(file, build_index=False)
+        return True
     except RuntimeError:
-        raise RuntimeError(
-            f"Input file {filepath} is not a fastq file. AuriClass expects fastq files"
-        )
+        return False
 
 
-# def is_fasta(file: str) -> bool:
-#     """
-#     Check if a file is a fasta file.
+def is_fasta(file: str) -> bool:
+    """
+    Check if a file is a fasta file.
 
-#     Parameters
-#     ----------
-#     filepath : str
-#         The path to the file to check.
+    Parameters
+    ----------
+    filepath : str
+        The path to the file to check.
 
-#     Returns
-#     -------
-#     None
+    Returns
+    -------
+    None
 
-#     Raises
-#     ------
-#     RuntimeError
-#         If the file is not a fasta file.
-#     """
-#     try:
-#         pyfastx.Fasta(file, build_index=False)
-#         return True
-#     except RuntimeError:
-#         return False
+    Raises
+    ------
+    RuntimeError
+        If the file is not a fasta file.
+    """
+    try:
+        pyfastx.Fasta(file, build_index=False)
+        return True
+    except RuntimeError:
+        return False
 
 
 def validate_input_files(list_of_files: List[str]) -> None:
@@ -204,3 +203,53 @@ def check_dependencies() -> None:
         )
     except FileNotFoundError:
         raise FileNotFoundError("Mash is not installed")
+
+
+def guess_input_type(list_of_file_paths: List[str]) -> str:
+    """
+    Guess the input type of a list of files.
+
+    Parameters
+    ----------
+    list_of_file_paths : list of str
+        The list of filepaths to check.
+
+    Returns
+    -------
+    str
+        The input type, either "fastq" or "fasta".
+
+    Raises
+    ------
+    ValueError
+        If any of the input files can be parsed as both fastq and fasta.
+
+        If any of the input files cannot be parsed as either fastq or fasta.
+
+        If the input files are a mix of fastq and fasta files.
+
+        If no input files were found.
+    """
+    fastq_count = 0
+    fasta_count = 0
+    for file_path in list_of_file_paths:
+        if is_fastq(file_path):
+            if is_fasta(file_path):
+                raise ValueError(
+                    f"Input file {file_path} can be parsed as both fastq and fasta. Please specify --fastq or --fasta"
+                )
+            else:
+                fastq_count += 1
+        elif is_fasta(file_path):
+            fasta_count += 1
+        else:
+            raise ValueError(f"Input file {file_path} is not a fastq or fasta file")
+
+    if fastq_count > 0 and fasta_count > 0:
+        raise ValueError(f"Input files are a mix of fastq and fasta files")
+    elif fastq_count > 0:
+        return "fastq"
+    elif fasta_count > 0:
+        return "fasta"
+    else:
+        raise ValueError(f"No input files were found")
