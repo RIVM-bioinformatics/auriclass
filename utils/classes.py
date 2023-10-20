@@ -87,6 +87,7 @@ class BasicAuriclass:
         - n_threads: the number of threads to use
         - reference_sketch_path: the path to the reference sketch
         - query_sketch_path: the path to the query sketch
+        - clade_dict: a dictionary containing the clade information for each reference sample
         """
         command = [
             "mash",
@@ -115,6 +116,7 @@ class BasicAuriclass:
             header=None,
             names=["Reference", "Query", "Distance", "P-value", "Matching-hashes"],
         )
+        df["Clade"] = df["Reference"].map(self.clade_dict["clade"])
         self.mash_output = df
         return df
 
@@ -180,7 +182,9 @@ class BasicAuriclass:
             "Reference"
         ]
         # Get clade of closest sample
-        self.clade = self.clade_dict["clade"][self.closest_sample]
+        self.clade = self.mash_output.loc[
+            self.mash_output["Reference"] == self.closest_sample, "Clade"
+        ].values[0]
         # Get minimal distance using self.mash_output and closest sample
         self.minimal_distance = self.mash_output.loc[
             self.mash_output["Reference"] == self.closest_sample, "Distance"
@@ -400,7 +404,7 @@ class BasicAuriclass:
         """
         # Get distance between highest hit and other samples
         self.distances = self.mash_output.loc[
-            self.mash_output["Reference"] != self.closest_sample, "Distance"
+            self.mash_output["Clade"] != self.clade, "Distance"
         ].values
         # Check if distance is higher than error_bound
         count_above_threshold = 0
