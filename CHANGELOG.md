@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.3.2...v0.4.0) (2023-10-20)
+
+
+### Features
+
+* add genome size calc for fasta input ([25cd78f](https://github.com/RIVM-bioinformatics/auriclass/commit/25cd78f6bb9d13df8c6a10616ddbe17af0d835f7))
+* allow fasta input ([7fc5555](https://github.com/RIVM-bioinformatics/auriclass/commit/7fc55552ecb993c9142069b1f6e98094149d38dd))
+
+
+### Bug Fixes
+
+* no warn if same clade is within error bound ([093371e](https://github.com/RIVM-bioinformatics/auriclass/commit/093371e650b1953c0ce8da64d3878cc24dce204c))
+* replace hardcoded value ([8cfdb7e](https://github.com/RIVM-bioinformatics/auriclass/commit/8cfdb7e952156fdf020819a2d4f7fbd9d58ad19e))
+* typo in ref data ([af74bb9](https://github.com/RIVM-bioinformatics/auriclass/commit/af74bb9eaccef1955e4b88d7779c1a2b1c3d8676))
+
 ## [0.3.2](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.3.1...v0.3.2) (2023-10-20)
 
 
