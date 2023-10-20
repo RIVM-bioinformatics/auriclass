@@ -593,7 +593,7 @@ class AuriClassAnalysis:
         ).replace("", "-").to_csv(self.output_report_path, sep="\t", index=False)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(
         description=__description__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
@@ -801,3 +801,7 @@ if __name__ == "__main__":
 
     # Save report
     sample.save_report()
+
+
+if __name__ == "__main__":
+    main()
