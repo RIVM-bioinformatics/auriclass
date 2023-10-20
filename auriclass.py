@@ -12,6 +12,7 @@ from typing import Any, Dict, Hashable, List, Union
 import pandas as pd
 
 from utils.args import auriclass_arg_parser
+from utils.classes import FastaAuriclass, FastqAuriclass
 from utils.general import (
     add_tag,
     check_dependencies,
@@ -593,6 +594,44 @@ class AuriClassAnalysis:
             ],
         ).replace("", "-").to_csv(self.output_report_path, sep="\t", index=False)
 
+    def run(self) -> None:
+        # Sketch query genome using tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.query_sketch_path = Path(tmpdir).joinpath("tmpfile.msh")
+            self.sketch_query()
+
+            # Run mash screen
+            self.run_mash()
+
+        # Check if genome size is within expected range
+        self.check_genome_size()
+
+        # Process results
+        self.select_clade()
+
+        # Check if all samples not above certain threshold indicating other species
+        probably_candida = self.check_non_candida()
+
+        if probably_candida:
+            # Check if clade is not "outgroup"
+            probably_cauris = self.check_for_outgroup()
+
+            if probably_cauris:
+                # Check if closest sample is above 0.005 distance --> new clade?
+                self.check_possible_new_clade()
+
+                # Check error bounds and check number of samples within error bounds
+                error_bounds_text = self.get_error_bounds()
+                self.process_error_bounds(error_bounds_text)
+                self.compare_with_error_bounds()
+            else:
+                self.clade = "other Candida sp."
+        else:
+            self.clade = "not Candida auris"
+
+        # Save report
+        self.save_report()
+
 
 def main() -> None:
     args = auriclass_arg_parser()
@@ -633,6 +672,46 @@ def main() -> None:
     # Check dependencies
     check_dependencies()
 
+    # if args.fastq:
+    #     input_type = "fastq"
+    # elif args.fasta:
+    #     input_type = "fasta"
+    # else:
+    #     input_type = guess_input_type(args.read_file_paths)
+
+    # if input_type == "fastq":
+    #     sample = FastqAuriclass(
+    #         name=args.name,
+    #         output_report_path=args.output_report_path,
+    #         read_paths=args.read_file_paths,
+    #         reference_sketch_path=args.reference_sketch_path,
+    #         kmer_size=int(args.kmer_size),
+    #         sketch_size=int(args.sketch_size),
+    #         minimal_kmer_coverage=int(args.minimal_kmer_coverage),
+    #         n_threads=int(args.n_threads),
+    #         clade_config_path=args.clade_config_path,
+    #         genome_size_range=[int(size) for size in args.expected_genome_size],
+    #         non_candida_threshold=float(args.non_candida_threshold),
+    #         new_clade_threshold=float(args.new_clade_threshold),
+    #     )
+    # elif input_type == "fasta":
+    #     sample = FastaAuriclass(
+    #         name=args.name,
+    #         output_report_path=args.output_report_path,
+    #         read_paths=args.read_file_paths,
+    #         reference_sketch_path=args.reference_sketch_path,
+    #         kmer_size=int(args.kmer_size),
+    #         sketch_size=int(args.sketch_size),
+    #         minimal_kmer_coverage=int(args.minimal_kmer_coverage),
+    #         n_threads=int(args.n_threads),
+    #         clade_config_path=args.clade_config_path,
+    #         genome_size_range=[int(size) for size in args.expected_genome_size],
+    #         non_candida_threshold=float(args.non_candida_threshold),
+    #         new_clade_threshold=float(args.new_clade_threshold),
+    #     )
+
+    # sample.run()
+
     # Create object
     sample = AuriClassAnalysis(
         name=args.name,
@@ -649,42 +728,7 @@ def main() -> None:
         new_clade_threshold=float(args.new_clade_threshold),
     )
 
-    # Sketch query genome using tempfile
-    with tempfile.TemporaryDirectory() as tmpdir:
-        sample.query_sketch_path = Path(tmpdir).joinpath("tmpfile.msh")
-        sample.sketch_query()
-
-        # Run mash screen
-        sample.run_mash()
-
-    # Check if genome size is within expected range
-    sample.check_genome_size()
-
-    # Process results
-    sample.select_clade()
-
-    # Check if all samples not above certain threshold indicating other species
-    probably_candida = sample.check_non_candida()
-
-    if probably_candida:
-        # Check if clade is not "outgroup"
-        probably_cauris = sample.check_for_outgroup()
-
-        if probably_cauris:
-            # Check if closest sample is above 0.005 distance --> new clade?
-            sample.check_possible_new_clade()
-
-            # Check error bounds and check number of samples within error bounds
-            error_bounds_text = sample.get_error_bounds()
-            sample.process_error_bounds(error_bounds_text)
-            sample.compare_with_error_bounds()
-        else:
-            sample.clade = "other Candida sp."
-    else:
-        sample.clade = "not Candida auris"
-
-    # Save report
-    sample.save_report()
+    sample.run()
 
 
 if __name__ == "__main__":
