@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.3.1...v0.3.2) (2023-10-20)
+
+
+### Documentation
+
+* add info to README ([b13d2b5](https://github.com/RIVM-bioinformatics/auriclass/commit/b13d2b5c525388a3885561befb03318e13b9dbae))
+
 ## [0.3.1](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.3.0...v0.3.1) (2023-10-20)
 
 
