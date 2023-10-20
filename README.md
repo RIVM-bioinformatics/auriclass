@@ -29,7 +29,7 @@ Two files with reference data are needed to start the analysis. Default files ar
 | File | Description |
 |---|---|
 | `data/clade_config.csv` | CSV table listing two columns: filename and associated clade. All included species that are not *Candida auris* are listed as "outgroup". |
-| `data/Candida_auris_clade_references.msh` | Mash sketch of reference genomes of *Candida auris* and related species. Constructed using sketch size 50,000 and k-mer size 27. |
+| `data/Candida_auris_clade_references.msh` | Mash sketch of reference genomes of *Candida auris* and related species. Reference genomes for *C. auris* clades were selected from [Suphavilai *et al*., Discovery of the sixth *Candida auris* clade in Singapore (medRxiv)](https://doi.org/10.1101/2023.08.01.23293435) and include two (nearly) completed genomes per clade, if available from NCBI. For Clade V only one (nearly) complete genome was available from NCBI. Related species were selected from figure 3 of [Muñoz *et al*., Genomic insights into multidrug-resistance, mating and virulence in *Candida auris* and related emerging species (NatComm)](https://doi.org/10.1038/s41467-018-07779-6). Representative genomes were downloaded from NCBI. The sketch was constructed using sketch size 50,000 and k-mer size 27. |
 
 See the FAQ for how to build your own database or change calibrated settings.
 
@@ -184,6 +184,14 @@ At least two options are available:
 2. Simulate read data from you Fasta files using wgsim, ART or another read simulator. 
 
 Allowing Fasta input files is planned for AuriClass. Before this can be implemented though, extra logic and possibly extra finetuning of settings is required. Therefore, this is not yet supported.
+
+- I want to build my own database and use this for this tool. How do I start?
+
+You would need to select reference genomes and define their respective clades. A sketch of the reference genomes should be supplied to AuriClass using the `-r` flag, while a CSV file following the format of `data/clade_config.csv` should be supplied using the `-c` flag. Any related species which should be excluded from the analysis should be defined as "outgroup" in the clade configuration file.
+
+Before using a new databases, it would be wise to calibrate the thresholds and settings you're planning to use. In the calibration of the default dataset, it was clear that for example the minimal kmer coverage (`-m` in both AuriClass and Mash sketch) has a big influence on the exact value of mash distance. Other factors that should be considered are kmer size (`-k`) and sketch size (`-s`).
+
+If you're missing certain reference genomes or if new clades need to be added, you can also open an [issue on GitHub](https://github.com/RIVM-bioinformatics/auriclass/issues).
 
 ## Future plans
 
