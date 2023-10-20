@@ -594,7 +594,7 @@ class AuriClassAnalysis:
         ).replace("", "-").to_csv(self.output_report_path, sep="\t", index=False)
 
 
-def main():
+def main() -> None:
     args = auriclass_arg_parser()
 
     if args.log_file_path:

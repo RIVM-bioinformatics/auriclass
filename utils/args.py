@@ -5,7 +5,7 @@ from .general import check_number_within_range
 from .version import __description__, __package_name__, __version__
 
 
-def auriclass_arg_parser():
+def auriclass_arg_parser() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=__description__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
