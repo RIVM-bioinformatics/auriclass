@@ -1,6 +1,6 @@
 testing
 refs
-report.*
+report*
 .vscode
 __pycache__
 *.py[cod]

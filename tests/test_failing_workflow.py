@@ -3,8 +3,8 @@ import tempfile
 
 import pytest
 
-from auriclass import AuriClassAnalysis
-from utils.general import check_dependencies, is_fastq, validate_input_files
+from utils.classes import BasicAuriclass, FastaAuriclass, FastqAuriclass
+from utils.general import check_dependencies, guess_input_type, validate_input_files
 
 os.makedirs("tmp_data", exist_ok=True)
 
@@ -23,8 +23,10 @@ error_bounds_text_ref = "\nParameters (run with -h for details):\n   k:   27\n  
 def test_nonexisting_input_files():
     """
     Test if ValueError is raised when min_genome_size is larger than max_genome_size
+
+    This behaviour is controlled by parent class BasicAuriclass
     """
-    testsample = AuriClassAnalysis(
+    testsample = BasicAuriclass(
         name="test",
         read_paths=[
             "tests/data/doesnotexist_1.fq.gz",
@@ -49,8 +51,10 @@ def test_nonexisting_input_files():
 def test_empty_input_files():
     """
     Test if ValueError is raised when min_genome_size is larger than max_genome_size
+
+    sketch_fastq_query() is a method of FastqAuriclass
     """
-    testsample = AuriClassAnalysis(
+    testsample = FastqAuriclass(
         name="test",
         read_paths=["tests/data/test_empty_1.fq.gz", "tests/data/test_empty_2.fq.gz"],
         output_report_path="tmp_data/test_report.tsv",
@@ -70,16 +74,16 @@ def test_empty_input_files():
     with tempfile.TemporaryDirectory() as tmpdir:
         testsample.query_sketch_path = f"{tmpdir}/tmpfile.msh"
         with pytest.raises(ValueError):
-            testsample.sketch_query()
+            testsample.sketch_fastq_query()
 
 
-def test_non_fastq_input_files():
+def test_non_fastq_or_fasta_input_files():
     """
     Test if ValueError is raised when a non-fastq file is provided
     """
-    testsample = AuriClassAnalysis(
+    testsample = FastqAuriclass(
         name="test",
-        read_paths=["tests/data/NC_001416.1.fasta.gz"],
+        read_paths=["tests/data/ref_sketch.msh"],
         output_report_path="tmp_data/test_report.tsv",
         reference_sketch_path="tests/data/ref_sketch.msh",
         genome_size_range=(40_000, 60_000),
@@ -93,6 +97,32 @@ def test_non_fastq_input_files():
     )
     check_dependencies()
     validate_input_files(testsample.read_paths)
-    with pytest.raises(RuntimeError):
-        for read_path in testsample.read_paths:
-            is_fastq(read_path)
+    with pytest.raises(ValueError):
+        guess_input_type(testsample.read_paths)
+
+
+def test_mixed_fastq_and_fasta_input_files():
+    """
+    Test if ValueError is raised when a non-fastq file is provided
+    """
+    testsample = FastqAuriclass(
+        name="test",
+        read_paths=[
+            "tests/data/NC_001416.1_1.fq.gz",
+            "tests/data/NC_001416.1.fasta.gz",
+        ],
+        output_report_path="tmp_data/test_report.tsv",
+        reference_sketch_path="tests/data/ref_sketch.msh",
+        genome_size_range=(40_000, 60_000),
+        kmer_size=27,
+        sketch_size=50_000,
+        minimal_kmer_coverage=3,
+        n_threads=1,
+        clade_config_path="tests/data/clade_config.csv",
+        non_candida_threshold=0.1,
+        new_clade_threshold=0.005,
+    )
+    check_dependencies()
+    validate_input_files(testsample.read_paths)
+    with pytest.raises(ValueError):
+        guess_input_type(testsample.read_paths)
