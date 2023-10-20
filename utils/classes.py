@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Hashable, List, Union
 
 import pandas as pd
+import pyfastx
 
 from utils.general import add_tag
 
@@ -689,6 +690,34 @@ class FastaAuriclass(BasicAuriclass):
             for line in stderr.splitlines():
                 logging.info(add_tag("mash sketch", line))
 
+    def parse_genome_size(self) -> None:
+        """
+        Parse the size of the fasta input using pyfastx.
+
+        Parameters
+        ----------
+        self : object
+            The AuriClassAnalysis object.
+
+        Returns
+        -------
+        None
+
+        Notes
+        -----
+        This function sets the following attributes of the object:
+        - estimated_genome_size: the estimated genome size of the current test sample
+
+        The function uses the following attributes of the object:
+        - read_paths: the paths to the fasta files to parse
+        """
+        total_size = 0
+        for filepath in self.read_paths:
+            # Reading a fasta file requires index building, so remove this afterwards
+            total_size += pyfastx.Fasta(filepath, build_index=True).size
+            Path(filepath + ".fxi").unlink(missing_ok=True)
+        self.estimated_genome_size = total_size
+
     def run(self) -> None:
         # Sketch query genome using tempfile
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -699,6 +728,7 @@ class FastaAuriclass(BasicAuriclass):
             self.run_mash_dist()
 
         # Check if genome size is within expected range
+        self.parse_genome_size()
         self.check_genome_size()
 
         # Process results
