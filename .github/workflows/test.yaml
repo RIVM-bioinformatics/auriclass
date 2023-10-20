@@ -45,17 +45,30 @@ jobs:
           python auriclass.py --help
           python auriclass.py --version
 
-          # Run example without error
+          # Run fastq example without error
           python auriclass.py --expected_genome_size 40000 60000 \
           --output report.tsv \
           -r tests/data/ref_sketch.msh \
           -c tests/data/clade_config.csv \
           tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
 
-          cmp report.tsv tests/data/reference_report.tsv
+          cmp report.tsv tests/data/reference_report_fastq.tsv
+
+          # Run fasta example without error
+          python auriclass.py --expected_genome_size 40000 60000 \
+          --output report.tsv \
+          -r tests/data/ref_sketch.msh \
+          -c tests/data/clade_config.csv \
+          tests/data/NC_001416.1.fasta.gz
+
+          cmp report.tsv tests/data/reference_report_fasta.tsv
 
           # Throw error if no read files are specified
           ! python auriclass.py 
+
+          # test if actions catches this
+          echo "Now we should see an error message:"
+          ! python auriclass.py tests/data/NC_001416.1.fasta.gz
 
           # Throw error if argument values are invalid
           ! python auriclass.py --expected_genome_size -1 1000000 tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
@@ -65,9 +78,6 @@ jobs:
 
           # Throw error if non-existent files is provided
           ! python auriclass.py tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz tests/data/does_not_exist.fq.gz
-
-          # Throw error if fasta is provided (until fasta handling is implemented)
-          ! python auriclass.py tests/data/NC_001416.1.fasta.gz
 
           # Throw error if non-fastq, non-fasta file is provided
           ! python auriclass.py tests/data/report.tsv
