@@ -41,43 +41,54 @@ jobs:
       - name: Run tests
         shell: bash -l {0}
         run: |
-          # Check if basic functions can be called without error
-          python auriclass.py --help
-          python auriclass.py --version
+          echo "Running help without error"
+          python auriclass.py --help 1>/dev/null
+          echo "exit code: $?"
 
-          # Run fastq example without error
+          echo "Running version without error"
+          python auriclass.py --version 1>/dev/null
+          echo "exit code: $?"
+
+          echo "Run fastq example without error"
           python auriclass.py --expected_genome_size 40000 60000 \
           --output report.tsv \
           -r tests/data/ref_sketch.msh \
           -c tests/data/clade_config.csv \
           tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+          echo "exit code: $?"
 
           cmp report.tsv tests/data/reference_report_fastq.tsv
 
-          # Run fasta example without error
+          echo "Run fasta example without error"
           python auriclass.py --expected_genome_size 40000 60000 \
           --output report.tsv \
           -r tests/data/ref_sketch.msh \
           -c tests/data/clade_config.csv \
           tests/data/NC_001416.1.fasta.gz
+          echo "exit code: $?"
 
           cmp report.tsv tests/data/reference_report_fasta.tsv
 
-          # Throw error if no read files are specified
+          echo "Running without read files and !:"
           ! python auriclass.py 
+          echo "exit code: $?"
 
-          # test if actions catches this
           echo "Now we should see an error message:"
           ! python auriclass.py tests/data/NC_001416.1.fasta.gz
+          echo "exit code: $?"
 
-          # Throw error if argument values are invalid
+          echo "Running with invalid argument values and !:"
           ! python auriclass.py --expected_genome_size -1 1000000 tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+          echo "exit code: $?"
 
-          # Throw error if non-existent argument is provided
+          echo "Running with non-existent argument and !:"
           ! python auriclass.py --does_not_exist tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+          echo "exit code: $?"
 
-          # Throw error if non-existent files is provided
+          echo "Running with non-existent file and !:"
           ! python auriclass.py tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz tests/data/does_not_exist.fq.gz
+          echo "exit code: $?"
 
-          # Throw error if non-fastq, non-fasta file is provided
+          echo "Running with non-fastq, non-fasta file and !:"
           ! python auriclass.py tests/data/report.tsv
+          echo "exit code: $?"
