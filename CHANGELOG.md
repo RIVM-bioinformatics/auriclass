@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.3.0...v0.3.1) (2023-10-20)
+
+
+### Bug Fixes
+
+* fill empty strings with dash symbol in report ([9045f4a](https://github.com/RIVM-bioinformatics/auriclass/commit/9045f4a117de2f70cb5e0326814e3a1308386b19))
+
 ## [0.3.0](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.2.0...v0.3.0) (2023-10-19)
 
 
