@@ -404,9 +404,10 @@ class BasicAuriclass:
         - error_bound: the error bound for the current sketch size and kmer size
         """
         # Get distance between highest hit and other samples
-        self.distances = self.mash_output.loc[
+        dist_array = self.mash_output.loc[
             self.mash_output["Clade"] != self.clade, "Distance"
         ].values
+        self.distances = [float(distance) for distance in dist_array]
         # Check if distance is higher than error_bound
         count_above_threshold = 0
         for distance in self.distances:
@@ -715,7 +716,7 @@ class FastaAuriclass(BasicAuriclass):
         for filepath in self.read_paths:
             # Reading a fasta file requires index building, so remove this afterwards
             total_size += pyfastx.Fasta(filepath, build_index=True).size
-            Path(filepath + ".fxi").unlink(missing_ok=True)
+            Path(str(filepath) + ".fxi").unlink(missing_ok=True)
         self.estimated_genome_size = total_size
 
     def run(self) -> None:
