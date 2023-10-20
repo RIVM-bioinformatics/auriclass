@@ -46,9 +46,6 @@ def main() -> None:
     validate_input_files([args.reference_sketch_path])
     validate_input_files([args.clade_config_path])
 
-    for read_file_path in args.read_file_paths:
-        is_fastq(read_file_path)
-
     args = validate_argument_logic(args)
 
     # Check dependencies
