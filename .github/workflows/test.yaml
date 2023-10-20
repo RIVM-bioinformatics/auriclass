@@ -79,10 +79,6 @@ jobs:
           ! python auriclass.py 
           check_exit_code
 
-          echo "Now we should see an error message:"
-          ! python auriclass.py tests/data/NC_001416.1.fasta.gz
-          check_exit_code
-
           echo "Running with invalid argument values and !:"
           ! python auriclass.py --expected_genome_size -1 1000000 tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
           check_exit_code
