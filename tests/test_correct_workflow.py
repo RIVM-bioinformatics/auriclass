@@ -84,7 +84,7 @@ def test_main():
     # Check if genome size is within expected range
     testsample.check_genome_size()
     assert testsample.estimated_genome_size == 48454.7
-    assert testsample.qc_genome_size == None
+    assert testsample.qc_genome_size == ""
 
     # Process results
     testsample.select_clade()
@@ -95,18 +95,18 @@ def test_main():
     # Check if all samples not above certain threshold indicating other species
     probably_candida = testsample.check_non_candida()
     assert probably_candida
-    assert testsample.qc_species == None
+    assert testsample.qc_species == ""
 
     if probably_candida:
         # Check if clade is not "outgroup"
         probably_cauris = testsample.check_for_outgroup()
         assert probably_cauris
-        assert testsample.qc_other_candida == None
+        assert testsample.qc_other_candida == ""
 
         if probably_cauris:
             # Check if closest sample is above 0.005 distance --> new clade?
             testsample.check_possible_new_clade()
-            assert testsample.qc_new_clade == None
+            assert testsample.qc_new_clade == ""
 
             # Check error bounds and check number of samples within error bounds
             error_bounds_text = testsample.get_error_bounds()
@@ -117,7 +117,7 @@ def test_main():
             testsample.compare_with_error_bounds()
             assert testsample.distances == [1.0]
             assert testsample.samples_within_error_bound == 0
-            assert testsample.qc_multiple_hits == None
+            assert testsample.qc_multiple_hits == ""
 
     # Save report
     testsample.save_report()
