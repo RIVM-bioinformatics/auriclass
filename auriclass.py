@@ -341,7 +341,7 @@ class AuriClassAnalysis:
 
     def check_possible_new_clade(self) -> None:
         """
-        Check if the closest sample is above 0.005 distance. If it is, it may indicate a new clade.
+        Check if the closest sample is above new_clade_threshold distance. If it is, it may indicate a new clade.
 
         Parameters
         ----------
@@ -359,8 +359,9 @@ class AuriClassAnalysis:
 
         The function uses the following attributes of the object:
         - minimal_distance: the minimal distance between the current test sample and the closest reference sample
+        - new_clade_threshold: the threshold above which the distance to the closest sample is considered to be a new clade
         """
-        if self.minimal_distance > 0.005:
+        if self.minimal_distance > self.new_clade_threshold:
             logging.warning(
                 f"AuriClass found a distance of {self.minimal_distance} to the closest sample, please ensure this is Candida auris"
             )
