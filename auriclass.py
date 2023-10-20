@@ -7,6 +7,7 @@ import tempfile
 from datetime import datetime
 from io import StringIO
 from pathlib import Path
+from typing import Any, Dict, Hashable, List, Union
 
 import pandas as pd
 
@@ -25,53 +26,55 @@ from version import __description__, __package_name__, __version__
 class AuriClassAnalysis:
     def __init__(
         self,
-        name,
-        output_report_path,
-        read_paths,
-        reference_sketch_path,
-        kmer_size,
-        sketch_size,
-        minimal_kmer_coverage,
-        n_threads,
-        clade_config_path,
-        genome_size_range,
-        non_candida_threshold,
-        new_clade_threshold,
-    ):
-        self.name = name
-        self.output_report_path = output_report_path
-        self.read_paths = read_paths
-        self.reference_sketch_path = reference_sketch_path
-        self.n_threads = n_threads
-        self.kmer_size = kmer_size
-        self.sketch_size = sketch_size
-        self.minimal_kmer_coverage = minimal_kmer_coverage
+        name: str,
+        output_report_path: Path,
+        read_paths: List[Path],
+        reference_sketch_path: Path,
+        kmer_size: int,
+        sketch_size: int,
+        minimal_kmer_coverage: int,
+        n_threads: int,
+        clade_config_path: Path,
+        genome_size_range: List[int],
+        non_candida_threshold: float,
+        new_clade_threshold: float,
+    ) -> None:
+        self.name: str = name
+        self.output_report_path: Path = output_report_path
+        self.read_paths: List[Path] = read_paths
+        self.reference_sketch_path: Path = reference_sketch_path
+        self.n_threads: int = n_threads
+        self.kmer_size: int = kmer_size
+        self.sketch_size: int = sketch_size
+        self.minimal_kmer_coverage: int = minimal_kmer_coverage
         # self.probability is used for mash bounds
         # this is not exposed in the CLI, because this should typically not be changed without extensive testing.
-        self.probability = 0.99
-        self.clade_dict = pd.read_csv(clade_config_path, index_col=0).to_dict(
-            orient="dict"
-        )
-        self.genome_size_range = genome_size_range
-        self.non_candida_threshold = non_candida_threshold
-        self.new_clade_threshold = new_clade_threshold
-        self.qc_decision = None
-        self.qc_genome_size = None
-        self.qc_other_candida = None
-        self.qc_species = None
-        self.qc_multiple_hits = None
-        self.qc_new_clade = None
-        self.query_sketch_path = None
-        self.minimal_distance = None
-        self.clade = None
-        self.samples_within_error_bound = None
-        self.error_bound = None
-        self.stdout = None
-        self.stderr = None
-        self.mash_output = None
-        self.distances = None
+        self.probability: float = 0.99
+        self.clade_dict: Dict[Hashable, Any] = pd.read_csv(
+            clade_config_path,
+            index_col=0,
+            dtype=str,
+        ).to_dict(orient="dict")
+        self.genome_size_range: List[int] = genome_size_range
+        self.non_candida_threshold: float = non_candida_threshold
+        self.new_clade_threshold: float = new_clade_threshold
+        self.qc_decision: str = ""
+        self.qc_genome_size: str = ""
+        self.qc_other_candida: str = ""
+        self.qc_species: str = ""
+        self.qc_multiple_hits: str = ""
+        self.qc_new_clade: str = ""
+        self.query_sketch_path: Path = Path()
+        self.minimal_distance: float = float()
+        self.clade: str = ""
+        self.samples_within_error_bound: int = int()
+        self.error_bound: float = float()
+        self.stdout: str = ""
+        self.stderr: str = ""
+        self.mash_output: pd.DataFrame = pd.DataFrame()
+        self.distances: List[float] = [float()]
 
-    def sketch_query(self):
+    def sketch_query(self) -> None:
         """
         Sketches the query fastq files using mash.
 
@@ -119,9 +122,10 @@ class AuriClassAnalysis:
             str(self.sketch_size),
             *self.read_paths,
         ]
-        logging.info(add_tag("mash sketch", " ".join(command)))
+        command_list_of_str = [str(item) for item in command]
+        logging.info(add_tag("mash sketch", " ".join(command_list_of_str)))
         output = subprocess.run(
-            command,
+            command_list_of_str,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -146,7 +150,7 @@ class AuriClassAnalysis:
                 "Estimated genome size could not be parsed from mash sketch STDERR"
             )
 
-    def run_mash(self):
+    def run_mash(self) -> pd.DataFrame:
         """
         Run Mash dist and save results.
 
@@ -179,9 +183,10 @@ class AuriClassAnalysis:
             self.reference_sketch_path,
             self.query_sketch_path,
         ]
-        logging.info(add_tag("mash dist", " ".join(command)))
+        command_list_of_str = [str(item) for item in command]
+        logging.info(add_tag("mash dist", " ".join(command_list_of_str)))
         output = subprocess.run(
-            command,
+            command_list_of_str,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
@@ -200,7 +205,7 @@ class AuriClassAnalysis:
         self.mash_output = df
         return df
 
-    def check_genome_size(self):
+    def check_genome_size(self) -> None:
         """
         Compare the estimated genome size with the expected genome size range.
 
@@ -233,7 +238,7 @@ class AuriClassAnalysis:
             )
             self.qc_genome_size = "WARN: genome size outside expected range"
 
-    def select_clade(self):
+    def select_clade(self) -> None:
         """
         Selects the closest reference sample and corresponding clade.
 
@@ -268,7 +273,7 @@ class AuriClassAnalysis:
             self.mash_output["Reference"] == self.closest_sample, "Distance"
         ].values[0]
 
-    def check_non_candida(self):
+    def check_non_candida(self) -> bool:
         """
         Check if the distance to the closest sample is higher than the non-Candida threshold.
 
@@ -300,7 +305,7 @@ class AuriClassAnalysis:
         else:
             return True
 
-    def check_for_outgroup(self):
+    def check_for_outgroup(self) -> bool:
         """
         Check if the closest sample is defined as outgroup.
 
@@ -334,7 +339,7 @@ class AuriClassAnalysis:
         else:
             return True
 
-    def check_possible_new_clade(self):
+    def check_possible_new_clade(self) -> None:
         """
         Check if the closest sample is above 0.005 distance. If it is, it may indicate a new clade.
 
@@ -361,7 +366,7 @@ class AuriClassAnalysis:
             )
             self.qc_new_clade = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
 
-    def get_error_bounds(self):
+    def get_error_bounds(self) -> str:
         """
         Get error bounds for the current sketch size and kmer size.
 
@@ -402,7 +407,7 @@ class AuriClassAnalysis:
 
         return output.stdout.decode("utf-8")
 
-    def process_error_bounds(self, error_bounds_text):
+    def process_error_bounds(self, error_bounds_text: str) -> None:
         """
         Process the error bounds text to get the error bound for the current sketch size and kmer size.
 
@@ -453,7 +458,7 @@ class AuriClassAnalysis:
             df["Sketch"] == self.sketch_size, selected_col
         ].values[0]
 
-    def compare_with_error_bounds(self):
+    def compare_with_error_bounds(self) -> None:
         """
         Compare the distance between the current test sample and the closest reference sample with the error bound.
 
@@ -511,7 +516,7 @@ class AuriClassAnalysis:
                 f"WARN: {self.samples_within_error_bound} sample(s) within error bound"
             )
 
-    def save_report(self):
+    def save_report(self) -> None:
         """
         Save the report to a TSV file.
 
@@ -761,7 +766,7 @@ if __name__ == "__main__":
 
     # Sketch query genome using tempfile
     with tempfile.TemporaryDirectory() as tmpdir:
-        sample.query_sketch_path = f"{tmpdir}/tmpfile.msh"
+        sample.query_sketch_path = Path(tmpdir).joinpath("tmpfile.msh")
         sample.sketch_query()
 
         # Run mash screen

@@ -2,11 +2,12 @@ import argparse
 import logging
 import subprocess
 from pathlib import Path
+from typing import Callable, List, Union
 
 import pyfastx
 
 
-def add_tag(tag, lines):
+def add_tag(tag: str, lines: str) -> str:
     """
     Add a tag to a string or list of strings.
 
@@ -31,7 +32,9 @@ def add_tag(tag, lines):
         return f"{full_tag}"
 
 
-def check_number_within_range(minimum=0, maximum=1):
+def check_number_within_range(
+    minimum: float = 0, maximum: float = 1
+) -> Union[Callable[[str], str], argparse.FileType]:
     """
     Creates a function to check whether a numeric value is within a range, inclusive.
 
@@ -62,7 +65,7 @@ def check_number_within_range(minimum=0, maximum=1):
     return generated_func_check_range
 
 
-def is_fastq(filepath):
+def is_fastq(filepath: str) -> None:
     """
     Check if a file is a fastq file.
 
@@ -88,7 +91,7 @@ def is_fastq(filepath):
         )
 
 
-# def is_fasta(file):
+# def is_fasta(file: str) -> bool:
 #     """
 #     Check if a file is a fasta file.
 
@@ -113,7 +116,7 @@ def is_fastq(filepath):
 #         return False
 
 
-def validate_input_files(list_of_files):
+def validate_input_files(list_of_files: List[str]) -> None:
     """
     Check if files in a list exist.
 
@@ -136,7 +139,7 @@ def validate_input_files(list_of_files):
             raise FileNotFoundError(f"Required input file {filepath} does not exist")
 
 
-def validate_argument_logic(args):
+def validate_argument_logic(args: argparse.Namespace) -> argparse.Namespace:
     """
     Check if arguments are valid, based on predefined logic.
 
@@ -176,7 +179,7 @@ def validate_argument_logic(args):
     return args
 
 
-def check_dependencies():
+def check_dependencies() -> None:
     """
     Check if dependencies are installed.
 
