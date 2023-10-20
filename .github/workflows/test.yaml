@@ -41,6 +41,7 @@ jobs:
       - name: Run tests
         shell: bash -l {0}
         run: |          
+          set -ex
           echo "Running help without error"
           python auriclass.py --help 1>/dev/null
           echo "exit code: $?"
