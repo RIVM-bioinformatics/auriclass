@@ -589,7 +589,7 @@ class AuriClassAnalysis:
                 "QC_multiple_hits",
                 "QC_possible_new_clade",
             ],
-        ).fillna("-").to_csv(self.output_report_path, sep="\t", index=False)
+        ).replace("", "-").to_csv(self.output_report_path, sep="\t", index=False)
 
 
 if __name__ == "__main__":
