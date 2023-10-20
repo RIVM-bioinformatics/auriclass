@@ -1,2 +1,2 @@
 Sample	Clade	Mash_distance_from_closest_reference	QC_decision	QC_species	QC_other_Candida	QC_genome_size	QC_multiple_hits	QC_possible_new_clade
-test	Lambda phage	0	PASS	-	-	-	-	-
+isolate	Lambda phage	0	PASS	-	-	-	-	-
