@@ -82,6 +82,18 @@ This forces AuriClass to perform the full analysis on a sample, even if the spec
 python auriclass.py --non_candida_threshold 1 Candida_auris_R1.fq.gz Candida_auris_R2.fq.gz
 ```
 
+### Running multiple samples in parallel
+
+AuriClass currently does not support multithreaded analysis. For both Fastq and Fasta input, multi-threading `mash` commands where possible makes minimal difference. Additionally, peak memory usage is typically 100-200 Mb RAM according to `/usr/bin/time -v`. Therefore, the best option if you have to analyse a lot of files is to run multiple AuriClass analyses concurrently. 
+
+Two good options are either workflow managers such as [Snakemake](https://snakemake.readthedocs.io/en/stable/), [Nextflow](https://www.nextflow.io/), etc. or [GNU `parallel`](https://www.gnu.org/software/parallel/).
+
+An example how to run AuriClass using `parallel` on a set of assemblies in the directory `fasta_input`:
+
+```
+parallel python auriclass.py --fasta -n {/.} -o report.{/.}.tsv {} ::: fasta_input/*
+```
+
 ## Description 
 
 ### Input
