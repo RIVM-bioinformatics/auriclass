@@ -118,8 +118,8 @@ def test_fastq():
 
         if probably_cauris:
             # Check if closest sample is above 0.005 distance --> new clade?
-            testsample.check_possible_new_clade()
-            assert testsample.qc_new_clade == ""
+            testsample.check_high_dist()
+            assert testsample.qc_high_distance == ""
 
             # Check error bounds and check number of samples within error bounds
             error_bounds_text = testsample.get_error_bounds()
@@ -216,7 +216,7 @@ def test_fasta():
 
         if probably_cauris:
             # Check if closest sample is above 0.005 distance --> new clade?
-            testsample.check_possible_new_clade()
+            testsample.check_high_dist()
             assert testsample.qc_high_distance == ""
 
             # Check error bounds and check number of samples within error bounds
