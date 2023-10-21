@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.5.0...v0.5.1) (2023-10-21)
+
+
+### Miscellaneous Chores
+
+* release 0.5.1 ([92f944c](https://github.com/RIVM-bioinformatics/auriclass/commit/92f944cd64075bfd00c8b0ee1719adbaae8dae9a))
+
 ## [0.5.0](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.4.0...v0.5.0) (2023-10-21)
 
 
