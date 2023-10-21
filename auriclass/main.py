@@ -3,16 +3,16 @@
 import logging
 from datetime import datetime
 
-from utils.args import auriclass_arg_parser
-from utils.classes import FastaAuriclass, FastqAuriclass
-from utils.general import (
+from auriclass.args import auriclass_arg_parser
+from auriclass.classes import FastaAuriclass, FastqAuriclass
+from auriclass.general import (
     check_dependencies,
+    confirm_input_type,
     guess_input_type,
-    is_fastq,
     validate_argument_logic,
     validate_input_files,
 )
-from utils.version import __description__, __package_name__, __version__
+from auriclass.version import __description__, __package_name__, __version__
 
 
 def main() -> None:
@@ -54,8 +54,10 @@ def main() -> None:
     # Get input type from args and guess otherwise
     if args.fastq:
         input_type = "fastq"
+        confirm_input_type(args.read_file_paths, input_type)
     elif args.fasta:
         input_type = "fasta"
+        confirm_input_type(args.read_file_paths, input_type)
     else:
         input_type = guess_input_type(args.read_file_paths)
 
@@ -69,11 +71,11 @@ def main() -> None:
             kmer_size=int(args.kmer_size),
             sketch_size=int(args.sketch_size),
             minimal_kmer_coverage=int(args.minimal_kmer_coverage),
-            n_threads=int(args.n_threads),
             clade_config_path=args.clade_config_path,
             genome_size_range=[int(size) for size in args.expected_genome_size],
             non_candida_threshold=float(args.non_candida_threshold),
-            new_clade_threshold=float(args.new_clade_threshold),
+            high_dist_threshold=float(args.high_dist_threshold),
+            no_qc=args.no_qc,
         )
 
         # Run object
@@ -88,11 +90,11 @@ def main() -> None:
             kmer_size=int(args.kmer_size),
             sketch_size=int(args.sketch_size),
             minimal_kmer_coverage=int(args.minimal_kmer_coverage),
-            n_threads=int(args.n_threads),
             clade_config_path=args.clade_config_path,
             genome_size_range=[int(size) for size in args.expected_genome_size],
             non_candida_threshold=float(args.non_candida_threshold),
-            new_clade_threshold=float(args.new_clade_threshold),
+            high_dist_threshold=float(args.high_dist_threshold),
+            no_qc=args.no_qc,
         )
 
         # Run object

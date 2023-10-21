@@ -43,18 +43,20 @@ jobs:
         run: |          
           set -ex
 
+          python -m pip install . --no-deps -vv
+
           check_exit_code () { exit_code=$?; echo "exit code: $exit_code"; if [ $exit_code -ne 0 ]; then exit 1; fi; }
 
           echo "Running help without error"
-          python auriclass.py --help 1>/dev/null
+          auriclass --help 1>/dev/null
           check_exit_code
 
           echo "Running version without error"
-          python auriclass.py --version 1>/dev/null
+          auriclass --version 1>/dev/null
           check_exit_code
 
           echo "Run fastq example without error"
-          python auriclass.py --expected_genome_size 40000 60000 \
+          auriclass --expected_genome_size 40000 60000 \
           --output report.tsv \
           -r tests/data/ref_sketch.msh \
           -c tests/data/clade_config.csv \
@@ -65,7 +67,7 @@ jobs:
           check_exit_code
 
           echo "Run fasta example without error"
-          python auriclass.py --expected_genome_size 40000 60000 \
+          auriclass --expected_genome_size 40000 60000 \
           --output report.tsv \
           -r tests/data/ref_sketch.msh \
           -c tests/data/clade_config.csv \
@@ -76,21 +78,21 @@ jobs:
           check_exit_code
 
           echo "Running without read files and !:"
-          ! python auriclass.py 
+          ! auriclass 
           check_exit_code
 
           echo "Running with invalid argument values and !:"
-          ! python auriclass.py --expected_genome_size -1 1000000 tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+          ! auriclass --expected_genome_size -1 1000000 tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
           check_exit_code
 
           echo "Running with non-existent argument and !:"
-          ! python auriclass.py --does_not_exist tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+          ! auriclass --does_not_exist tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
           check_exit_code
 
           echo "Running with non-existent file and !:"
-          ! python auriclass.py tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz tests/data/does_not_exist.fq.gz
+          ! auriclass tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz tests/data/does_not_exist.fq.gz
           check_exit_code
 
           echo "Running with non-fastq, non-fasta file and !:"
-          ! python auriclass.py tests/data/report.tsv
+          ! auriclass tests/data/report.tsv
           check_exit_code

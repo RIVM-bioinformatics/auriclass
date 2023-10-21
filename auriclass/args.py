@@ -1,8 +1,8 @@
 import argparse
 from pathlib import Path
 
-from .general import check_number_within_range
-from .version import __description__, __package_name__, __version__
+from auriclass.general import check_number_within_range
+from auriclass.version import __description__, __package_name__, __version__
 
 
 def auriclass_arg_parser() -> argparse.Namespace:
@@ -45,11 +45,10 @@ def auriclass_arg_parser() -> argparse.Namespace:
         action="store_true",
     )
     main_args.add_argument(
-        "-t",
-        "--n_threads",
-        help="Number of threads.\nNOTE: multithreading has minimal effect on performance as mash sketch is single-threaded",
-        default=1,
-        type=check_number_within_range(0, 100),
+        "--no_qc",
+        help="Skip extended QC",
+        action="store_true",
+        dest="no_qc",
     )
     main_args.add_argument(
         "--log_file_path",
@@ -90,9 +89,9 @@ def auriclass_arg_parser() -> argparse.Namespace:
         type=check_number_within_range(0, 1),
     )
     qc_args.add_argument(
-        "--new_clade_threshold",
-        help="If the minimal distance from a reference sample is above this threshold, the sample might not be a known C. auris clade.",
-        default=0.005,
+        "--high_dist_threshold",
+        help="If the minimal distance from a reference sample is above this threshold, a warning is emitted. See the docs for more info.",
+        default=0.003,
         type=check_number_within_range(0, 1),
     )
 

@@ -4,8 +4,8 @@ import tempfile
 
 import pytest
 
-from utils.classes import FastaAuriclass, FastqAuriclass
-from utils.general import (
+from auriclass.classes import FastaAuriclass, FastqAuriclass
+from auriclass.general import (
     check_dependencies,
     is_fastq,
     validate_argument_logic,
@@ -54,10 +54,10 @@ def test_fastq():
         kmer_size=27,
         sketch_size=50_000,
         minimal_kmer_coverage=3,
-        n_threads=1,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        new_clade_threshold=0.005,
+        high_dist_threshold=0.003,
+        no_qc=False,
     )
 
     # Validate inputs before creating object
@@ -79,10 +79,10 @@ def test_fastq():
         kmer_size=args.kmer_size,
         sketch_size=args.sketch_size,
         minimal_kmer_coverage=args.minimal_kmer_coverage,
-        n_threads=args.n_threads,
         clade_config_path=args.clade_config_path,
         non_candida_threshold=args.non_candida_threshold,
-        new_clade_threshold=args.new_clade_threshold,
+        high_dist_threshold=args.high_dist_threshold,
+        no_qc=args.no_qc,
     )
 
     # Sketch query genome using tempfile
@@ -118,8 +118,8 @@ def test_fastq():
 
         if probably_cauris:
             # Check if closest sample is above 0.005 distance --> new clade?
-            testsample.check_possible_new_clade()
-            assert testsample.qc_new_clade == ""
+            testsample.check_high_dist()
+            assert testsample.qc_high_distance == ""
 
             # Check error bounds and check number of samples within error bounds
             error_bounds_text = testsample.get_error_bounds()
@@ -151,10 +151,10 @@ def test_fasta():
         kmer_size=27,
         sketch_size=50_000,
         minimal_kmer_coverage=3,
-        n_threads=1,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        new_clade_threshold=0.005,
+        high_dist_threshold=0.005,
+        no_qc=False,
     )
 
     # Validate inputs before creating object
@@ -176,10 +176,10 @@ def test_fasta():
         kmer_size=args.kmer_size,
         sketch_size=args.sketch_size,
         minimal_kmer_coverage=args.minimal_kmer_coverage,
-        n_threads=args.n_threads,
         clade_config_path=args.clade_config_path,
         non_candida_threshold=args.non_candida_threshold,
-        new_clade_threshold=args.new_clade_threshold,
+        high_dist_threshold=args.high_dist_threshold,
+        no_qc=args.no_qc,
     )
 
     # Sketch query genome using tempfile
@@ -216,8 +216,8 @@ def test_fasta():
 
         if probably_cauris:
             # Check if closest sample is above 0.005 distance --> new clade?
-            testsample.check_possible_new_clade()
-            assert testsample.qc_new_clade == ""
+            testsample.check_high_dist()
+            assert testsample.qc_high_distance == ""
 
             # Check error bounds and check number of samples within error bounds
             error_bounds_text = testsample.get_error_bounds()
