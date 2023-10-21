@@ -133,7 +133,7 @@ The columns in the output report have the following information:
 ## Usage
 
 ```
-usage: auriclass.py [-h] [-n NAME] [-o OUTPUT_REPORT_PATH] [--fastq] [--fasta] [--log_file_path LOG_FILE_PATH] [--verbose] [--debug] [--version] [--expected_genome_size EXPECTED_GENOME_SIZE EXPECTED_GENOME_SIZE]
+usage: auriclass.py [-h] [-n NAME] [-o OUTPUT_REPORT_PATH] [--fastq] [--fasta] [--no_qc] [--log_file_path LOG_FILE_PATH] [--verbose] [--debug] [--version] [--expected_genome_size EXPECTED_GENOME_SIZE EXPECTED_GENOME_SIZE]
                     [--non_candida_threshold NON_CANDIDA_THRESHOLD] [--high_dist_threshold HIGH_DIST_THRESHOLD] [-r REFERENCE_SKETCH_PATH] [-c CLADE_CONFIG_PATH] [-k KMER_SIZE] [-s SKETCH_SIZE] [-m MINIMAL_KMER_COVERAGE]
                     read_file_paths [read_file_paths ...]
 
@@ -151,6 +151,7 @@ Main arguments:
                         Path to output report (default: report.tsv)
   --fastq               Input files are fastq files (default: False)
   --fasta               Input files are fasta files (default: False)
+  --no_qc               Skip extended QC (default: False)
   --log_file_path LOG_FILE_PATH
                         Path to log file (default: None)
   --verbose             Verbose output (default: False)
@@ -225,6 +226,12 @@ With that in mind, the warning can mean the following:
 
 In both cases, a comparative method with higher resolution (e.g. reference-based mapping phylogeny) would help solve what's wrong.
 
+- I see "SKIPPED" in the output report for QC columns. What does this mean?
+
+If the sample fails the `qc_species` check (mash distance > `--non_candida_threshold`), the sample is assumed to be a species not related to *Candida*. Therefore, no further analysis is performed and the output report is immediately returned.
+
+"SKIPPED" will also appear for QC_genome_size, QC_multiple_hits and QC_high_distance if you disable these check using `--no_qc`.
+
 - I want to build my own database and use this for this tool. How do I start?
 
 You would need to select reference genomes and define their respective clades. A sketch of the reference genomes should be supplied to AuriClass using the `-r` flag, while a CSV file following the format of `data/clade_config.csv` should be supplied using the `-c` flag. Any related species which should be excluded from the analysis should be defined as "outgroup" in the clade configuration file.
@@ -236,3 +243,4 @@ If you're missing certain reference genomes or if new clades need to be added, y
 ## Future plans
 
 1. Make a bioconda package
+2. Check if mash sketch is needed for fasta (probably not)

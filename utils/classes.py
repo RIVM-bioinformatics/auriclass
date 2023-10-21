@@ -26,6 +26,7 @@ class BasicAuriclass:
         genome_size_range: List[int],
         non_candida_threshold: float,
         high_dist_threshold: float,
+        no_qc: bool,
     ) -> None:
         self.name: str = name
         self.output_report_path: Path = output_report_path
@@ -45,6 +46,7 @@ class BasicAuriclass:
         self.genome_size_range: List[int] = genome_size_range
         self.non_candida_threshold: float = non_candida_threshold
         self.high_dist_threshold: float = high_dist_threshold
+        self.no_qc: bool = no_qc
         self.qc_decision: str = ""
         self.qc_genome_size: str = ""
         self.qc_other_candida: str = ""
@@ -213,7 +215,7 @@ class BasicAuriclass:
             logging.warning(
                 f"AuriClass found a distance of {self.minimal_distance} to the closest sample, please ensure this is Candida auris"
             )
-            self.qc_species = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
+            self.qc_species = f"FAIL: distance {self.minimal_distance} to closest sample is above threshold"
             return False
         else:
             return True
@@ -246,7 +248,7 @@ class BasicAuriclass:
                 f"AuriClass found a non-Candida auris reference as closest sample, please ensure this is Candida auris"
             )
             self.qc_other_candida = (
-                f"WARN: outgroup reference {self.closest_sample} as closest sample"
+                f"FAIL: outgroup reference {self.closest_sample} as closest sample"
             )
             return False
         else:
@@ -459,25 +461,54 @@ class BasicAuriclass:
         - clade: the clade of the closest reference sample
         - minimal_distance: the minimal distance between the current test sample and the closest reference sample
         - output_report_path: the path to the output report
+        - no_qc: a boolean indicating whether to skip extended QC
         """
+        FAIL_metrics = [
+            "qc_species",
+            "qc_other_candida",
+        ]
+        WARN_metrics = [
+            "qc_genome_size",
+            "qc_multiple_hits",
+            "qc_high_distance",
+        ]
+        if self.no_qc:
+            # Set all attributes in WARN_metrics to "SKIPPED"
+            for metric in WARN_metrics:
+                setattr(self, metric, "SKIPPED")
+
         # Check if any of the qc attributes contain "WARN"
-        if any(
-            [
-                self.qc_species,
-            ]
-        ):
+        FAIL_observed = any(
+            ["FAIL" in getattr(self, qc_metric) for qc_metric in FAIL_metrics]
+        )
+        WARN_observed = any(
+            ["WARN" in getattr(self, qc_metric) for qc_metric in WARN_metrics]
+        )
+
+        if FAIL_observed:
             self.qc_decision = "FAIL"
-        elif any(
-            [
-                self.qc_genome_size,
-                self.qc_other_candida,
-                self.qc_multiple_hits,
-                self.qc_high_distance,
-            ]
-        ):
+        elif WARN_observed:
             self.qc_decision = "WARN"
         else:
             self.qc_decision = "PASS"
+
+        # if any(
+        #     [
+        #         ("FAIL" in qc_metric) for qc_metric in [self.qc_species],
+        #     ]
+        # ):
+        #     self.qc_decision = "FAIL"
+        # elif any(
+        #     [
+        #         self.qc_genome_size,
+        #         self.qc_other_candida,
+        #         self.qc_multiple_hits,
+        #         self.qc_high_distance,
+        #     ]
+        # ):
+        #     self.qc_decision = "WARN"
+        # else:
+        #     self.qc_decision = "PASS"
 
         pd.DataFrame(
             [
@@ -504,7 +535,7 @@ class BasicAuriclass:
                 "QC_multiple_hits",
                 "QC_high_distance",
             ],
-        ).replace("", "-").to_csv(self.output_report_path, sep="\t", index=False)
+        ).replace("", "PASS").to_csv(self.output_report_path, sep="\t", index=False)
 
 
 class FastqAuriclass(BasicAuriclass):
@@ -607,17 +638,22 @@ class FastqAuriclass(BasicAuriclass):
             probably_cauris = self.check_for_outgroup()
 
             if probably_cauris:
-                # Check if closest sample is above self.high_dist_threshold distance --> new clade?
-                self.check_high_dist()
+                if self.no_qc == False:
+                    # Check if closest sample is above self.high_dist_threshold distance --> new clade?
+                    self.check_high_dist()
 
-                # Check error bounds and check number of samples within error bounds
-                error_bounds_text = self.get_error_bounds()
-                self.process_error_bounds(error_bounds_text)
-                self.compare_with_error_bounds()
+                    # Check error bounds and check number of samples within error bounds
+                    error_bounds_text = self.get_error_bounds()
+                    self.process_error_bounds(error_bounds_text)
+                    self.compare_with_error_bounds()
             else:
                 self.clade = "other Candida/CUG-Ser1 clade sp."
         else:
             self.clade = "not Candida auris"
+            self.qc_other_candida = "SKIPPED"
+            self.qc_genome_size = "SKIPPED"
+            self.qc_multiple_hits = "SKIPPED"
+            self.qc_high_distance = "SKIPPED"
 
         # Save report
         self.save_report()
@@ -736,19 +772,23 @@ class FastaAuriclass(BasicAuriclass):
         if probably_candida:
             # Check if clade is not "outgroup"
             probably_cauris = self.check_for_outgroup()
-
             if probably_cauris:
-                # Check if closest sample is above self.high_dist_threshold distance --> new clade?
-                self.check_high_dist()
+                if self.no_qc == False:
+                    # Check if closest sample is above self.high_dist_threshold distance --> new clade?
+                    self.check_high_dist()
 
-                # Check error bounds and check number of samples within error bounds
-                error_bounds_text = self.get_error_bounds()
-                self.process_error_bounds(error_bounds_text)
-                self.compare_with_error_bounds()
+                    # Check error bounds and check number of samples within error bounds
+                    error_bounds_text = self.get_error_bounds()
+                    self.process_error_bounds(error_bounds_text)
+                    self.compare_with_error_bounds()
             else:
                 self.clade = "other Candida/CUG-Ser1 clade sp."
         else:
             self.clade = "not Candida auris"
+            self.qc_other_candida = "SKIPPED"
+            self.qc_genome_size = "SKIPPED"
+            self.qc_multiple_hits = "SKIPPED"
+            self.qc_high_distance = "SKIPPED"
 
         # Save report
         self.save_report()

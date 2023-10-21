@@ -45,6 +45,12 @@ def auriclass_arg_parser() -> argparse.Namespace:
         action="store_true",
     )
     main_args.add_argument(
+        "--no_qc",
+        help="Skip extended QC",
+        action="store_true",
+        dest="no_qc",
+    )
+    main_args.add_argument(
         "--log_file_path",
         help="Path to log file",
         type=Path,

@@ -75,6 +75,7 @@ def main() -> None:
             genome_size_range=[int(size) for size in args.expected_genome_size],
             non_candida_threshold=float(args.non_candida_threshold),
             high_dist_threshold=float(args.high_dist_threshold),
+            no_qc=args.no_qc,
         )
 
         # Run object
@@ -93,6 +94,7 @@ def main() -> None:
             genome_size_range=[int(size) for size in args.expected_genome_size],
             non_candida_threshold=float(args.non_candida_threshold),
             high_dist_threshold=float(args.high_dist_threshold),
+            no_qc=args.no_qc,
         )
 
         # Run object
