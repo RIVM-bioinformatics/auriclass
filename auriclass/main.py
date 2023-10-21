@@ -3,16 +3,16 @@
 import logging
 from datetime import datetime
 
-from utils.args import auriclass_arg_parser
-from utils.classes import FastaAuriclass, FastqAuriclass
-from utils.general import (
+from auriclass.args import auriclass_arg_parser
+from auriclass.classes import FastaAuriclass, FastqAuriclass
+from auriclass.general import (
     check_dependencies,
     confirm_input_type,
     guess_input_type,
     validate_argument_logic,
     validate_input_files,
 )
-from utils.version import __description__, __package_name__, __version__
+from auriclass.version import __description__, __package_name__, __version__
 
 
 def main() -> None:

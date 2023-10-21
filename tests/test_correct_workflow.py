@@ -4,8 +4,8 @@ import tempfile
 
 import pytest
 
-from utils.classes import FastaAuriclass, FastqAuriclass
-from utils.general import (
+from auriclass.classes import FastaAuriclass, FastqAuriclass
+from auriclass.general import (
     check_dependencies,
     is_fastq,
     validate_argument_logic,
@@ -56,7 +56,8 @@ def test_fastq():
         minimal_kmer_coverage=3,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        high_dist_threshold=0.005,
+        high_dist_threshold=0.003,
+        no_qc=False,
     )
 
     # Validate inputs before creating object
@@ -81,6 +82,7 @@ def test_fastq():
         clade_config_path=args.clade_config_path,
         non_candida_threshold=args.non_candida_threshold,
         high_dist_threshold=args.high_dist_threshold,
+        no_qc=args.no_qc,
     )
 
     # Sketch query genome using tempfile
@@ -152,6 +154,7 @@ def test_fasta():
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
         high_dist_threshold=0.005,
+        no_qc=False,
     )
 
     # Validate inputs before creating object
@@ -176,6 +179,7 @@ def test_fasta():
         clade_config_path=args.clade_config_path,
         non_candida_threshold=args.non_candida_threshold,
         high_dist_threshold=args.high_dist_threshold,
+        no_qc=args.no_qc,
     )
 
     # Sketch query genome using tempfile

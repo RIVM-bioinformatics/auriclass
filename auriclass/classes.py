@@ -8,7 +8,7 @@ from typing import Any, Dict, Hashable, List, Union
 import pandas as pd
 import pyfastx
 
-from utils.general import add_tag
+from auriclass.general import add_tag
 
 
 # define class Sample

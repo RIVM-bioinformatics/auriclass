@@ -3,8 +3,8 @@ import tempfile
 
 import pytest
 
-from utils.classes import BasicAuriclass, FastaAuriclass, FastqAuriclass
-from utils.general import check_dependencies, guess_input_type, validate_input_files
+from auriclass.classes import BasicAuriclass, FastaAuriclass, FastqAuriclass
+from auriclass.general import check_dependencies, guess_input_type, validate_input_files
 
 os.makedirs("tmp_data", exist_ok=True)
 
@@ -40,7 +40,8 @@ def test_nonexisting_input_files():
         minimal_kmer_coverage=3,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        high_dist_threshold=0.005,
+        high_dist_threshold=0.003,
+        no_qc=False,
     )
     check_dependencies()
     with pytest.raises(FileNotFoundError):
@@ -64,7 +65,8 @@ def test_empty_input_files():
         minimal_kmer_coverage=3,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        high_dist_threshold=0.005,
+        high_dist_threshold=0.003,
+        no_qc=False,
     )
     check_dependencies()
 
@@ -90,7 +92,8 @@ def test_non_fastq_or_fasta_input_files():
         minimal_kmer_coverage=3,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        high_dist_threshold=0.005,
+        high_dist_threshold=0.003,
+        no_qc=False,
     )
     check_dependencies()
     validate_input_files(testsample.read_paths)
@@ -116,7 +119,8 @@ def test_mixed_fastq_and_fasta_input_files():
         minimal_kmer_coverage=3,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        high_dist_threshold=0.005,
+        high_dist_threshold=0.003,
+        no_qc=False,
     )
     check_dependencies()
     validate_input_files(testsample.read_paths)
