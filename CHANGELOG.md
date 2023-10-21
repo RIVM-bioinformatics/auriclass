@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.5.0](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.4.0...v0.5.0) (2023-10-21)
+
+
+### Features
+
+* add possibility to skip extended qc ([b8fff2d](https://github.com/RIVM-bioinformatics/auriclass/commit/b8fff2df6bf7db06294acded8515b0944f86b47b))
+
+
+### Documentation
+
+* explain how to run parallel ([af44653](https://github.com/RIVM-bioinformatics/auriclass/commit/af44653c2dc436460195c5fa206ec44cedc9d3e7))
+* update README ([102be6f](https://github.com/RIVM-bioinformatics/auriclass/commit/102be6fc8690b23cc8e9b735c62dcee8a46ae0d6))
+
 ## [0.4.0](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.3.2...v0.4.0) (2023-10-20)
 
 
