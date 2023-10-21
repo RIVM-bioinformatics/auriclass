@@ -26,7 +26,7 @@ class BasicAuriclass:
         clade_config_path: Path,
         genome_size_range: List[int],
         non_candida_threshold: float,
-        new_clade_threshold: float,
+        high_dist_threshold: float,
     ) -> None:
         self.name: str = name
         self.output_report_path: Path = output_report_path
@@ -46,13 +46,13 @@ class BasicAuriclass:
         ).to_dict(orient="dict")
         self.genome_size_range: List[int] = genome_size_range
         self.non_candida_threshold: float = non_candida_threshold
-        self.new_clade_threshold: float = new_clade_threshold
+        self.high_dist_threshold: float = high_dist_threshold
         self.qc_decision: str = ""
         self.qc_genome_size: str = ""
         self.qc_other_candida: str = ""
         self.qc_species: str = ""
         self.qc_multiple_hits: str = ""
-        self.qc_new_clade: str = ""
+        self.qc_high_distance: str = ""
         self.query_sketch_path: Path = Path()
         self.estimated_genome_size: float = float()
         self.minimal_distance: float = float()
@@ -257,9 +257,9 @@ class BasicAuriclass:
         else:
             return True
 
-    def check_possible_new_clade(self) -> None:
+    def check_high_dist(self) -> None:
         """
-        Check if the closest sample is above new_clade_threshold distance. If it is, it may indicate a new clade.
+        Check if the closest sample is above high_dist_threshold distance. If it is, it may indicate a new clade.
 
         Parameters
         ----------
@@ -273,17 +273,17 @@ class BasicAuriclass:
         Notes
         -----
         This function sets the following attributes of the object:
-        - qc_new_clade: a warning message if the closest sample is above 0.005 distance
+        - qc_high_distance: a warning message if the closest sample is above self.high_dist_threshold distance
 
         The function uses the following attributes of the object:
         - minimal_distance: the minimal distance between the current test sample and the closest reference sample
-        - new_clade_threshold: the threshold above which the distance to the closest sample is considered to be a new clade
+        - high_dist_threshold: the threshold above which the distance to the closest sample is considered to be a new clade
         """
-        if self.minimal_distance > self.new_clade_threshold:
+        if self.minimal_distance > self.high_dist_threshold:
             logging.warning(
                 f"AuriClass found a distance of {self.minimal_distance} to the closest sample, please ensure this is Candida auris"
             )
-            self.qc_new_clade = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
+            self.qc_high_distance = f"WARN: distance {self.minimal_distance} to closest sample is above threshold"
 
     def get_error_bounds(self) -> str:
         """
@@ -459,7 +459,7 @@ class BasicAuriclass:
         - qc_other_candida: a warning message if the closest sample is defined as outgroup
         - qc_genome_size: a warning message if the estimated genome size is outside the expected range
         - qc_multiple_hits: a warning message if the number of samples within the error bound of the closest sample is higher than 0
-        - qc_new_clade: a warning message if the closest sample is above 0.005 distance
+        - qc_high_distance: a warning message if the closest sample is above self.high_dist_threshold distance
         - name: the name of the current test sample
         - clade: the clade of the closest reference sample
         - minimal_distance: the minimal distance between the current test sample and the closest reference sample
@@ -477,7 +477,7 @@ class BasicAuriclass:
                 self.qc_genome_size,
                 self.qc_other_candida,
                 self.qc_multiple_hits,
-                self.qc_new_clade,
+                self.qc_high_distance,
             ]
         ):
             self.qc_decision = "WARN"
@@ -495,7 +495,7 @@ class BasicAuriclass:
                     self.qc_other_candida,
                     self.qc_genome_size,
                     self.qc_multiple_hits,
-                    self.qc_new_clade,
+                    self.qc_high_distance,
                 ]
             ],
             columns=[
@@ -507,7 +507,7 @@ class BasicAuriclass:
                 "QC_other_Candida",
                 "QC_genome_size",
                 "QC_multiple_hits",
-                "QC_possible_new_clade",
+                "QC_high_distance",
             ],
         ).replace("", "-").to_csv(self.output_report_path, sep="\t", index=False)
 
@@ -612,15 +612,15 @@ class FastqAuriclass(BasicAuriclass):
             probably_cauris = self.check_for_outgroup()
 
             if probably_cauris:
-                # Check if closest sample is above 0.005 distance --> new clade?
-                self.check_possible_new_clade()
+                # Check if closest sample is above self.high_dist_threshold distance --> new clade?
+                self.check_high_dist()
 
                 # Check error bounds and check number of samples within error bounds
                 error_bounds_text = self.get_error_bounds()
                 self.process_error_bounds(error_bounds_text)
                 self.compare_with_error_bounds()
             else:
-                self.clade = "other Candida sp."
+                self.clade = "other Candida/CUG-Ser1 clade sp."
         else:
             self.clade = "not Candida auris"
 
@@ -743,15 +743,15 @@ class FastaAuriclass(BasicAuriclass):
             probably_cauris = self.check_for_outgroup()
 
             if probably_cauris:
-                # Check if closest sample is above 0.005 distance --> new clade?
-                self.check_possible_new_clade()
+                # Check if closest sample is above self.high_dist_threshold distance --> new clade?
+                self.check_high_dist()
 
                 # Check error bounds and check number of samples within error bounds
                 error_bounds_text = self.get_error_bounds()
                 self.process_error_bounds(error_bounds_text)
                 self.compare_with_error_bounds()
             else:
-                self.clade = "other Candida sp."
+                self.clade = "other Candida/CUG-Ser1 clade sp."
         else:
             self.clade = "not Candida auris"
 

@@ -90,9 +90,9 @@ def auriclass_arg_parser() -> argparse.Namespace:
         type=check_number_within_range(0, 1),
     )
     qc_args.add_argument(
-        "--new_clade_threshold",
-        help="If the minimal distance from a reference sample is above this threshold, the sample might not be a known C. auris clade.",
-        default=0.005,
+        "--high_dist_threshold",
+        help="If the minimal distance from a reference sample is above this threshold, a warning is emitted. See the docs for more info.",
+        default=0.003,
         type=check_number_within_range(0, 1),
     )
 

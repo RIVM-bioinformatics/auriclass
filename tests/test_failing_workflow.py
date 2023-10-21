@@ -41,7 +41,7 @@ def test_nonexisting_input_files():
         n_threads=1,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        new_clade_threshold=0.005,
+        high_dist_threshold=0.005,
     )
     check_dependencies()
     with pytest.raises(FileNotFoundError):
@@ -66,7 +66,7 @@ def test_empty_input_files():
         n_threads=1,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        new_clade_threshold=0.005,
+        high_dist_threshold=0.005,
     )
     check_dependencies()
 
@@ -93,7 +93,7 @@ def test_non_fastq_or_fasta_input_files():
         n_threads=1,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        new_clade_threshold=0.005,
+        high_dist_threshold=0.005,
     )
     check_dependencies()
     validate_input_files(testsample.read_paths)
@@ -120,7 +120,7 @@ def test_mixed_fastq_and_fasta_input_files():
         n_threads=1,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        new_clade_threshold=0.005,
+        high_dist_threshold=0.005,
     )
     check_dependencies()
     validate_input_files(testsample.read_paths)

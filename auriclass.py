@@ -73,7 +73,7 @@ def main() -> None:
             clade_config_path=args.clade_config_path,
             genome_size_range=[int(size) for size in args.expected_genome_size],
             non_candida_threshold=float(args.non_candida_threshold),
-            new_clade_threshold=float(args.new_clade_threshold),
+            high_dist_threshold=float(args.high_dist_threshold),
         )
 
         # Run object
@@ -92,7 +92,7 @@ def main() -> None:
             clade_config_path=args.clade_config_path,
             genome_size_range=[int(size) for size in args.expected_genome_size],
             non_candida_threshold=float(args.non_candida_threshold),
-            new_clade_threshold=float(args.new_clade_threshold),
+            high_dist_threshold=float(args.high_dist_threshold),
         )
 
         # Run object

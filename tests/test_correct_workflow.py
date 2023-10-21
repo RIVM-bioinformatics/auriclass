@@ -57,7 +57,7 @@ def test_fastq():
         n_threads=1,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        new_clade_threshold=0.005,
+        high_dist_threshold=0.005,
     )
 
     # Validate inputs before creating object
@@ -82,7 +82,7 @@ def test_fastq():
         n_threads=args.n_threads,
         clade_config_path=args.clade_config_path,
         non_candida_threshold=args.non_candida_threshold,
-        new_clade_threshold=args.new_clade_threshold,
+        high_dist_threshold=args.high_dist_threshold,
     )
 
     # Sketch query genome using tempfile
@@ -154,7 +154,7 @@ def test_fasta():
         n_threads=1,
         clade_config_path="tests/data/clade_config.csv",
         non_candida_threshold=0.1,
-        new_clade_threshold=0.005,
+        high_dist_threshold=0.005,
     )
 
     # Validate inputs before creating object
@@ -179,7 +179,7 @@ def test_fasta():
         n_threads=args.n_threads,
         clade_config_path=args.clade_config_path,
         non_candida_threshold=args.non_candida_threshold,
-        new_clade_threshold=args.new_clade_threshold,
+        high_dist_threshold=args.high_dist_threshold,
     )
 
     # Sketch query genome using tempfile
@@ -217,7 +217,7 @@ def test_fasta():
         if probably_cauris:
             # Check if closest sample is above 0.005 distance --> new clade?
             testsample.check_possible_new_clade()
-            assert testsample.qc_new_clade == ""
+            assert testsample.qc_high_distance == ""
 
             # Check error bounds and check number of samples within error bounds
             error_bounds_text = testsample.get_error_bounds()
