@@ -253,3 +253,40 @@ def guess_input_type(list_of_file_paths: List[str]) -> str:
         return "fasta"
     else:
         raise ValueError(f"No input files were found")
+
+
+def confirm_input_type(list_of_file_paths, input_type):
+    """
+    Confirms that input files are of the specified type.
+
+    Parameters
+    ----------
+    list_of_file_paths : list of str
+        The list of filepaths to check.
+    input_type : str
+        The input type to check.
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+
+    Notes
+    -----
+    This function does not raise any exceptions, but it does log a warning if any of the input files are not of the specified type.
+    This is intended to run if the user specifies the input type with --fastq or --fasta.
+    """
+    for file_path in list_of_file_paths:
+        if input_type == "fastq":
+            if not is_fastq(file_path):
+                logging.warning(
+                    f"Input file {file_path} cannot be parsed as a fastq file, please check if --fastq is appropriate"
+                )
+        elif input_type == "fasta":
+            if not is_fasta(file_path):
+                logging.warning(
+                    f"Input file {file_path} cannot be parsed as a fasta file, please check if --fasta is appropriate"
+                )

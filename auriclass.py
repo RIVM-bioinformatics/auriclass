@@ -7,8 +7,8 @@ from utils.args import auriclass_arg_parser
 from utils.classes import FastaAuriclass, FastqAuriclass
 from utils.general import (
     check_dependencies,
+    confirm_input_type,
     guess_input_type,
-    is_fastq,
     validate_argument_logic,
     validate_input_files,
 )
@@ -54,8 +54,10 @@ def main() -> None:
     # Get input type from args and guess otherwise
     if args.fastq:
         input_type = "fastq"
+        confirm_input_type(args.read_file_paths, input_type)
     elif args.fasta:
         input_type = "fasta"
+        confirm_input_type(args.read_file_paths, input_type)
     else:
         input_type = guess_input_type(args.read_file_paths)
 
