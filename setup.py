@@ -1,6 +1,5 @@
 import sys
 
-from packaging import version as vv
 from setuptools import find_packages, setup
 
 from auriclass.version import __version__
@@ -34,4 +33,10 @@ setup(
     keywords=[],
     include_package_data=True,
     zip_safe=False,
+    classifiers=[
+        "Programming Language :: Python",
+        "License :: OSI Approved :: GNU Affero General Public License v3",
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
+        "Intended Audience :: Science/Research",
+    ],
 )
