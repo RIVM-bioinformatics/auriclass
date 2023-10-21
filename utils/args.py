@@ -45,13 +45,6 @@ def auriclass_arg_parser() -> argparse.Namespace:
         action="store_true",
     )
     main_args.add_argument(
-        "-t",
-        "--n_threads",
-        help="Number of threads.\nNOTE: multithreading has minimal effect on performance as mash sketch is single-threaded",
-        default=1,
-        type=check_number_within_range(0, 100),
-    )
-    main_args.add_argument(
         "--log_file_path",
         help="Path to log file",
         type=Path,

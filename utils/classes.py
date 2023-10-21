@@ -22,7 +22,6 @@ class BasicAuriclass:
         kmer_size: int,
         sketch_size: int,
         minimal_kmer_coverage: int,
-        n_threads: int,
         clade_config_path: Path,
         genome_size_range: List[int],
         non_candida_threshold: float,
@@ -32,7 +31,6 @@ class BasicAuriclass:
         self.output_report_path: Path = output_report_path
         self.read_paths: List[Path] = read_paths
         self.reference_sketch_path: Path = reference_sketch_path
-        self.n_threads: int = n_threads
         self.kmer_size: int = kmer_size
         self.sketch_size: int = sketch_size
         self.minimal_kmer_coverage: int = minimal_kmer_coverage
@@ -85,7 +83,6 @@ class BasicAuriclass:
         - mash_output: a pandas DataFrame containing the output of the Mash distance calculation
 
         The function uses the following attributes of the object:
-        - n_threads: the number of threads to use
         - reference_sketch_path: the path to the reference sketch
         - query_sketch_path: the path to the query sketch
         - clade_dict: a dictionary containing the clade information for each reference sample
@@ -93,8 +90,6 @@ class BasicAuriclass:
         command = [
             "mash",
             "dist",
-            "-p",
-            str(self.n_threads),
             self.reference_sketch_path,
             self.query_sketch_path,
         ]

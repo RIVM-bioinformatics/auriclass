@@ -121,9 +121,8 @@ The columns in the output report have the following information:
 ## Usage
 
 ```
-usage: auriclass.py [-h] [-n NAME] [-o OUTPUT_REPORT_PATH] [--fastq] [--fasta] [-t N_THREADS] [--log_file_path LOG_FILE_PATH] [--verbose] [--debug] [--version]
-                    [--expected_genome_size EXPECTED_GENOME_SIZE EXPECTED_GENOME_SIZE] [--non_candida_threshold NON_CANDIDA_THRESHOLD] [--high_dist_threshold HIGH_DIST_THRESHOLD] [-r REFERENCE_SKETCH_PATH]
-                    [-c CLADE_CONFIG_PATH] [-k KMER_SIZE] [-s SKETCH_SIZE] [-m MINIMAL_KMER_COVERAGE]
+usage: auriclass.py [-h] [-n NAME] [-o OUTPUT_REPORT_PATH] [--fastq] [--fasta] [--log_file_path LOG_FILE_PATH] [--verbose] [--debug] [--version] [--expected_genome_size EXPECTED_GENOME_SIZE EXPECTED_GENOME_SIZE]
+                    [--non_candida_threshold NON_CANDIDA_THRESHOLD] [--high_dist_threshold HIGH_DIST_THRESHOLD] [-r REFERENCE_SKETCH_PATH] [-c CLADE_CONFIG_PATH] [-k KMER_SIZE] [-s SKETCH_SIZE] [-m MINIMAL_KMER_COVERAGE]
                     read_file_paths [read_file_paths ...]
 
 AuriClass predicts Candida auris clade from Illumina WGS data
@@ -140,8 +139,6 @@ Main arguments:
                         Path to output report (default: report.tsv)
   --fastq               Input files are fastq files (default: False)
   --fasta               Input files are fasta files (default: False)
-  -t N_THREADS, --n_threads N_THREADS
-                        Number of threads. NOTE: multithreading has minimal effect on performance as mash sketch is single-threaded (default: 1)
   --log_file_path LOG_FILE_PATH
                         Path to log file (default: None)
   --verbose             Verbose output (default: False)
