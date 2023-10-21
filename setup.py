@@ -1,6 +1,5 @@
 import sys
 
-from packaging import version as vv
 from setuptools import find_packages, setup
 
 from auriclass.version import __version__
