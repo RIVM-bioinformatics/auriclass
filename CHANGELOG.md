@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.2](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.5.1...v0.5.2) (2023-10-23)
+
+
+### Bug Fixes
+
+* add missing types ([bd250df](https://github.com/RIVM-bioinformatics/auriclass/commit/bd250df8797ba2b2c35167234ffd5b7c0d0d0bd0))
+
+
+### Documentation
+
+* update installation ([7ab7c25](https://github.com/RIVM-bioinformatics/auriclass/commit/7ab7c2533038e0d42234142681a087170cfb7075))
+
 ## [0.5.1](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.5.0...v0.5.1) (2023-10-21)
 
 
