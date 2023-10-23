@@ -1,3 +1,7 @@
+![install with bioconda](https://img.shields.io/conda/v/bioconda/auriclass)
+
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/rivm-bioinformatics/auriclass/test.yaml?label=Tests)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/rivm-bioinformatics/auriclass/super_linter.yaml?label=Linting)
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://github.com/RIVM-bioinformatics/auriclass/blob/master/LICENSE)
 ![GitHub release](https://img.shields.io/github/v/release/rivm-bioinformatics/auriclass)
@@ -26,19 +30,20 @@ We needed a tool that:
 At the start of development, alternative approaches to classify *C. auris* clades relied on visual inspection of phylogenies or required Fasta input (like the [cauris_cladetyper task](https://github.com/theiagen/public_health_bioinformatics/blob/main/tasks/species_typing/task_cauris_cladetyper.wdl) from TheiaEuk workflow).
 
 ## Installation
-Currently, AuriClass can only be cloned from GitHub, and dependencies should be installed through `mamba`/`conda`. 
+The easiest way to install AuriClass is through mamba/conda:
 
 ```
-# Checkout the repo
-git clone https://github.com/RIVM-bioinformatics/auriclass.git
-# Install conda environment
-cd auriclass
-mamba env create -f env.yaml
-# Activate conda environment
+mamba create -n env_auriclass -c bioconda -c conda-forge auriclass
 conda activate env_auriclass
 ```
 
-A package in the bioconda channels is planned.
+Alternatively, [biocontainers](https://quay.io/repository/biocontainers/auriclass) has built a container from the AuriClass bioconda package. This container can be used with different container software, e.g. Singularity:
+
+```
+singularity pull docker://quay.io/biocontainers/auriclass:0.5.1--pyhdfd78af_0
+```
+
+Please note that `auriclass:latest` is not defined, so make sure to specify the latest bioconda version and build.
 
 ## Examples
 
@@ -242,5 +247,4 @@ If you're missing certain reference genomes or if new clades need to be added, y
 
 ## Future plans
 
-1. Make a bioconda package
-2. Check if mash sketch is needed for fasta (probably not)
+1. Check if mash sketch is needed for fasta (probably not)
