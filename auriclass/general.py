@@ -255,7 +255,7 @@ def guess_input_type(list_of_file_paths: List[str]) -> str:
         raise ValueError(f"No input files were found")
 
 
-def confirm_input_type(list_of_file_paths, input_type):
+def confirm_input_type(list_of_file_paths: List[str], input_type: str) -> None:
     """
     Confirms that input files are of the specified type.
 
