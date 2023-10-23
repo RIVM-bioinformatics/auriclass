@@ -1,3 +1,7 @@
+![install with bioconda](https://img.shields.io/conda/v/bioconda/auriclass)
+
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/rivm-bioinformatics/auriclass/test.yaml?label=Tests)
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/rivm-bioinformatics/auriclass/super_linter.yaml?label=Linting)
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://github.com/RIVM-bioinformatics/auriclass/blob/master/LICENSE)
 ![GitHub release](https://img.shields.io/github/v/release/rivm-bioinformatics/auriclass)
