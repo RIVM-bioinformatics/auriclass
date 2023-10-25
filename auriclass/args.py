@@ -103,13 +103,13 @@ def auriclass_arg_parser() -> argparse.Namespace:
         "-r",
         "--reference_sketch_path",
         help="Path to reference sketch",
-        default="data/Candida_auris_clade_references.msh",
+        default="",
     )
     other_args.add_argument(
         "-c",
         "--clade_config_path",
         help="Path to clade config",
-        default="data/clade_config.csv",
+        default="",
     )
     other_args.add_argument(
         "-k",

@@ -82,15 +82,23 @@ jobs:
           check_exit_code
 
           echo "Running with invalid argument values and !:"
-          ! auriclass --expected_genome_size -1 1000000 tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+          ! auriclass -r tests/data/ref_sketch.msh \
+          -c tests/data/clade_config.csv \
+          --expected_genome_size -1 1000000 \
+          tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
           check_exit_code
 
           echo "Running with non-existent argument and !:"
-          ! auriclass --does_not_exist tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
+          ! auriclass -r tests/data/ref_sketch.msh \
+          -c tests/data/clade_config.csv \
+          --does_not_exist \
+          tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz
           check_exit_code
 
           echo "Running with non-existent file and !:"
-          ! auriclass tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz tests/data/does_not_exist.fq.gz
+          ! auriclass -r tests/data/ref_sketch.msh \
+          -c tests/data/clade_config.csv \
+          tests/data/NC_001416.1_1.fq.gz tests/data/NC_001416.1_2.fq.gz tests/data/does_not_exist.fq.gz
           check_exit_code
 
           echo "Running with non-fastq, non-fasta file and !:"
