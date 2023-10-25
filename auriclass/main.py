@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from pathlib import Path
 
 from auriclass.args import auriclass_arg_parser
 from auriclass.classes import FastaAuriclass, FastqAuriclass
@@ -33,6 +34,22 @@ def main() -> None:
         datefmt="%H:%M:%S",
     )
     logging.getLogger().addHandler(logging.StreamHandler())
+
+    if args.reference_sketch_path == "":
+        for parent_dir in Path(__file__).parents:
+            if parent_dir.stem == "lib":
+                args.reference_sketch_path = parent_dir.parent.joinpath(
+                    "data", "Candida_auris_clade_references.msh"
+                )
+                break
+
+    if args.clade_config_path == "":
+        for parent_dir in Path(__file__).parents:
+            if parent_dir.stem == "lib":
+                args.clade_config_path = parent_dir.parent.joinpath(
+                    "data", "clade_config.csv"
+                )
+                break
 
     # If -V is specified, set logging level to DEBUG
     if args.verbose:

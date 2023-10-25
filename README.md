@@ -52,19 +52,19 @@ Please note that `auriclass:latest` is not defined, so make sure to specify the 
 Running AuriClass on only the forward reads gives the best results, as the reverse reads are usually more noisy:
 
 ```
-python auriclass.py Candida_auris_R1.fq.gz
+auriclass Candida_auris_R1.fq.gz
 ```
 
 But it can also be run on an arbitrary number of fastq files of the same organism:
 
 ```
-python auriclass.py Candida_auris_R1.fq.gz Candida_auris_R2.fq.gz Candida_auris_unpaired.fq.gz
+auriclass Candida_auris_R1.fq.gz Candida_auris_R2.fq.gz Candida_auris_unpaired.fq.gz
 ```
 
 or with a fasta file:
 
 ```
-python auriclass.py Candida_auris.fasta.gz
+auriclass Candida_auris.fasta.gz
 ```
 
 A standard analysis creates two files:
