@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.3](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.5.2...v0.5.3) (2023-10-25)
+
+
+### Bug Fixes
+
+* fix default data location ([73f6e02](https://github.com/RIVM-bioinformatics/auriclass/commit/73f6e0213954cbb9bf9d5f15f472104ca4fd18df))
+
 ## [0.5.2](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.5.1...v0.5.2) (2023-10-23)
 
 
