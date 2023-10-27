@@ -1,0 +1,47 @@
+site_name: AuriClass
+site_url: https://rivm-bioinformatics.github.io/AuriClass
+repo_url: https://github.com/rivm-bioinformatics/auriclass/
+repo_name: rivm-bioinformatics/auriclass
+edit_uri: ""
+
+nav:
+  - Home: index.md
+  - Usage:
+    - Installation: installation.md
+    - Running an analysis: running_analysis.md
+    - Input & output: input_output.md
+    - Full usage: full_usage.md
+  - Methodology: methodology.md
+  - Reference: reference.md
+  - FAQ: faq.md
+  - Changelog: changelog.md
+
+# Basic config theming config settings
+theme:
+  name: material
+  language: en
+
+plugins:
+- search
+- mkdocstrings
+- mike
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - admonition
+  - pymdownx.details
+
+# version provider integrated with Material theme
+extra:
+  version:
+    provider: mike

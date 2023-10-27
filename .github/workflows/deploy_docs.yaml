@@ -1,0 +1,24 @@
+name: Publish docs via GitHub Pages
+on:
+  push:
+    branches: [main, setup_mkdocs]
+
+jobs:
+  build:
+    name: Deploy docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Copy Changelog
+        uses: canastro/copy-file-action@master
+        with:
+          source: "CHANGELOG.md"
+          target: "docs/changelog.md"
+
+      - name: Checkout master
+        uses: actions/checkout@v3
+
+      - name: Deploy docs
+        uses: mhausenblas/mkdocs-deploy-gh-pages@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REQUIREMENTS: docs/docs-requirements.txt
