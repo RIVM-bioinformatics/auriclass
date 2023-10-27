@@ -12,7 +12,7 @@
 
 AuriClass is a small tool which predicts *Candida auris* clade based on Mash distances from reference genomes. It accepts fastq or fasta files. Analysis typically takes a minute for Fastq data and a couple of seconds for Fasta data.
 
-Documentation is available from https://rivm-bioinformatics.github.io/Auriclass.
+Documentation is available from https://rivm-bioinformatics.github.io/auriclass.
 
 ## Installation
 The easiest way to install AuriClass is through mamba/conda:
