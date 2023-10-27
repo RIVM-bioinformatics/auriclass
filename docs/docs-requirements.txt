@@ -5,3 +5,4 @@ mike
 mkdocstrings[python]
 mkdocs-material
 mkdocs-material-extensions
+mkdocs-table-reader-plugin

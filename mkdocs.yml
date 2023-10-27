@@ -10,9 +10,10 @@ nav:
     - Installation: installation.md
     - Running an analysis: running_analysis.md
     - Input & output: input_output.md
+    - Reference genomes: reference_genomes.md
     - Full usage: full_usage.md
   - Methodology: methodology.md
-  - Reference: reference.md
+  - Reference documentation: reference.md
   - FAQ: faq.md
   - Changelog: changelog.md
 
@@ -25,6 +26,7 @@ plugins:
 - search
 - mkdocstrings
 - mike
+- table-reader
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -40,6 +42,7 @@ markdown_extensions:
           format: !!python/name:pymdownx.superfences.fence_code_format
   - admonition
   - pymdownx.details
+  - tables
 
 # version provider integrated with Material theme
 extra:
