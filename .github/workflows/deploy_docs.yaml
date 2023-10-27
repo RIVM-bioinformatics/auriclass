@@ -8,14 +8,14 @@ jobs:
     name: Deploy docs
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout main
+        uses: actions/checkout@v3
+
       - name: Copy Changelog
         uses: canastro/copy-file-action@master
         with:
           source: "CHANGELOG.md"
           target: "docs/changelog.md"
-
-      - name: Checkout master
-        uses: actions/checkout@v3
 
       - name: Deploy docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
