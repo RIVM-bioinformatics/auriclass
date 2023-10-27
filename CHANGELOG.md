@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.4](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.5.3...v0.5.4) (2023-10-27)
+
+
+### Documentation
+
+* add reference genome table ([ad801da](https://github.com/RIVM-bioinformatics/auriclass/commit/ad801dad00eef705655b24a62fc088a81e59eae8))
+* fix typo in README ([082b018](https://github.com/RIVM-bioinformatics/auriclass/commit/082b018758301d4d4e6da33b91480f44173ee70e))
+* test mkdocs deployment ([0441eb3](https://github.com/RIVM-bioinformatics/auriclass/commit/0441eb3c746ffd1e52fd53b356232cc34b73f395))
+
 ## [0.5.3](https://github.com/RIVM-bioinformatics/auriclass/compare/v0.5.2...v0.5.3) (2023-10-25)
 
 
